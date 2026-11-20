@@ -70,7 +70,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .pbtn.lava{background:var(--lava);color:#fff;box-shadow:inset -3px -3px 0 #a8300a,inset 3px 3px 0 #ff9a6e,4px 4px 0 rgba(7,11,34,.5)}
 .pbtn.ghost{background:var(--box);color:var(--paper);box-shadow:inset -3px -3px 0 #0b1233,inset 3px 3px 0 #2c3b7a,4px 4px 0 rgba(7,11,34,.5)}
 
-.zoom{position:fixed;z-index:5;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(92px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:10px}
+.zoom{position:fixed;z-index:5;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(38px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:10px}
 .zoom .pbtn{width:48px;height:48px;font-size:22px;padding:0}
 
 .foot{position:fixed;z-index:4;left:calc(16px + env(safe-area-inset-left,0px));bottom:calc(38px + env(safe-area-inset-bottom,0px));display:flex;align-items:flex-end;gap:12px;font-family:var(--f-display);font-size:12px;pointer-events:none}
@@ -107,6 +107,7 @@ body.has-card .foot{display:none}
   padding:3px max(10px,env(safe-area-inset-right,0px)) calc(3px + env(safe-area-inset-bottom,0px)) 10px;
   font:11px/1.35 var(--f-body);color:#e4e6f3;background:rgba(7,11,34,.78);text-align:right}
 .attrib button{font:inherit;padding:0;cursor:pointer}
+.ringcard .stats dd{font-size:16px}
 .blink{animation:blink 1s steps(1) infinite}
 @keyframes blink{50%{opacity:0}}
 
@@ -126,9 +127,13 @@ body.has-card .foot{display:none}
 .about a{color:var(--gold)}
 
 @media (max-width:640px){
+  body.ring-open .hud{display:none}
+  .ringcard{padding:12px 14px 14px}
+  .ringcard .fact{font-size:14px;line-height:1.4;margin-bottom:10px}
+  .ringcard .stats{margin:10px 0 8px;gap:6px 12px}
+  .ringcard .stats dd{font-size:15px}
   .attrib{left:0;text-align:center;font-size:10px}
-  .foot,.card{bottom:calc(44px + env(safe-area-inset-bottom,0px))}
-  .zoom{bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+  .zoom,.foot,.card{bottom:calc(44px + env(safe-area-inset-bottom,0px))}
   .title{padding:10px 12px 8px}
   .title h1{font-size:24px}
   .title h1 small{font-size:13px}
@@ -147,6 +152,7 @@ body.has-card .foot{display:none}
 </style>
 </head>
 <body>
+
 
 <canvas id="map" aria-label="Mapa interactivo de volcanes del mundo"></canvas>
 
@@ -187,6 +193,18 @@ body.has-card .foot{display:none}
 </div>
 
 <section class="card box" id="card" hidden aria-live="polite"></section>
+<section class="card box ringcard" id="ringcard" hidden aria-live="polite">
+  <div class="top"><h3>Cinturón de Fuego</h3><button class="x" id="ringX" aria-label="Cerrar Cinturón de Fuego">×</button></div>
+  <p class="fact">Un arco de unos 40,000 km que bordea el océano Pacífico. Ahí, unas placas tectónicas se hunden bajo otras: la roca se funde y sube como magma.</p>
+  <dl class="stats">
+    <div><dt>VOLCANES DEL MUNDO</dt><dd>≈ 75 %</dd></div>
+    <div><dt>SISMOS DEL MUNDO</dt><dd>≈ 90 %</dd></div>
+    <div><dt>EN ESTE MAPA</dt><dd id="ringCount">—</dd></div>
+    <div><dt>RECORRIDO</dt><dd>Chile → Nueva Zelanda</dd></div>
+  </dl>
+  <p class="src">Fuentes: <a href="https://education.nationalgeographic.org/resource/plate-tectonics-ring-fire/" target="_blank" rel="noopener">National Geographic</a> · <a href="https://www.britannica.com/place/Ring-of-Fire" target="_blank" rel="noopener">Britannica</a></p>
+  <div class="actions"><button class="pbtn lava" id="ringReplay">VER DE NUEVO</button><button class="pbtn ghost" id="ringClose">CERRAR</button></div>
+</section>
 <footer class="attrib">Mapa: <a href="https://eduardoluis.blog" target="_blank" rel="noopener">Eduardo Luis</a> · Datos: <a href="https://volcano.si.edu/" target="_blank" rel="noopener">Global Volcanism Program, Smithsonian</a> y Wikipedia · nov. 2026 · <button type="button" id="srcBtn">Fuentes</button></footer>
 
 <div class="about box" id="about" hidden role="dialog" aria-label="Acerca del mapa">
@@ -778,6 +796,50 @@ function label(text,x,y,size,fill,align){
 const CLOUDS=Array.from({length:22},(_,i)=>({x:Math.random()*W,y:150+Math.random()*(H-300),s:0.6+Math.random()*0.9,v:0.004+Math.random()*0.006,shape:i%3}));
 const CSHAPES=[["..XXX....","XXXXXXX..",".XXXXXXXX"],["...XX....",".XXXXXX..","XXXXXXXXX","..XXXXX.."],[".XXX.XX..","XXXXXXXXX"]];
 
+// ---------- Cinturón de Fuego ----------
+// Longitudes continuas (Asia y Oceanía como lon-360) para que la línea no se corte en el antimeridiano.
+const RING_LINES=[
+ [[-75,-52],[-75.5,-42],[-74,-35],[-72.5,-28],[-71.5,-20],[-76,-14],[-80.5,-7],[-81.5,-2],[-80,3],[-78.5,7],[-83,8.5],[-86,11],[-89,13],[-92.5,14.5],[-96,15.5],[-101,17.5],[-105.5,20],[-111,26],[-117,32.5],[-121,36],[-124.5,40.5],[-125,44],[-125.5,48.5],[-130,53],[-136,58],[-145,59.8],[-152,58],[-158,55.5],[-165,53.5],[-172,51.8],[-180,51.2],[-188,52.2],[-196,54.5],[-198.5,53],[-203,50.5],[-207,47.5],[-212,44.5],[-215,42],[-217.5,38],[-219.5,34.5],[-221,34],[-228,31],[-232,27],[-238.5,23],[-239,18],[-236,13],[-234.5,8],[-233.5,3],[-232,-1],[-226,-3.5],[-217,-4],[-210,-5.5],[-205,-6.5],[-200,-10],[-193,-15],[-191,-20],[-186,-22],[-184,-19],[-175,-20],[-174,-22],[-176,-27],[-178,-32],[-181,-36],[-183,-38],[-185,-40],[-186.5,-42],[-189,-44],[-193,-46.5]],
+ [[-230,-4],[-230,-6.5],[-236,-8.5],[-241,-9],[-247,-9],[-253,-7.8],[-256,-5.5],[-259,-2],[-262,2],[-265,5.5]],
+ [[-219.5,34.5],[-218,30],[-217.5,24],[-215,18],[-215.5,13]]
+];
+const RING=RING_LINES.map(pts=>{const P=pts.map(([lo,la])=>[px(lo),py(la)]);const L=[0];for(let i=1;i<P.length;i++)L.push(L[i-1]+Math.hypot(P[i][0]-P[i-1][0],P[i][1]-P[i-1][1]));return {pts,P,L,len:L[L.length-1]};});
+function segDist(x,y,a,b){const dx=b[0]-a[0],dy=b[1]-a[1];const t=Math.max(0,Math.min(1,((x-a[0])*dx+(y-a[1])*dy)/(dx*dx+dy*dy||1)));return Math.hypot(x-a[0]-t*dx,y-a[1]-t*dy);}
+V.forEach(v=>{let best=1e9;for(const r of RING)for(let i=1;i<r.pts.length;i++)for(const lon of [v.lon,v.lon-360,v.lon+360])best=Math.min(best,segDist(lon,v.lat,r.pts[i-1],r.pts[i]));v.ring=best<5;});
+let ring=null;
+function openRing(){ring={t0:performance.now()};document.getElementById('ringCount').textContent=`${V.filter(v=>v.ring).length} de ${V.length}`;
+  document.getElementById('ringcard').hidden=false;document.body.classList.add('has-card','ring-open');}
+function closeRing(){ring=null;document.body.classList.remove('ring-open');document.getElementById('ringcard').hidden=true;if(card.hidden)document.body.classList.remove('has-card');}
+function drawRing(t){
+  if(!ring)return;
+  const prog=REDUCED?1:Math.min(1,(t-ring.t0)/3600), lw=Math.max(3,Math.min(10,Math.round(cam.z*2.4)));
+  ctx.save();ctx.lineJoin='round';ctx.lineCap='round';
+  RING.forEach((r,i)=>{
+    const pp=i===0?prog:Math.max(0,Math.min(1,(prog-0.62)/0.38));if(pp<=0)return;
+    const target=r.len*pp;
+    for(const k of [-1,0,1]){
+      const pts=[];
+      for(let j=0;j<r.P.length;j++){
+        let [x,y]=r.P[j];
+        if(j>0&&r.L[j]>target){const [x0,y0]=r.P[j-1],f=(target-r.L[j-1])/(r.L[j]-r.L[j-1]);x=x0+(x-x0)*f;y=y0+(y-y0)*f;}
+        pts.push([(x+k*W-cam.x)*cam.z+vw/2,(y-cam.y)*cam.z+vh/2]);
+        if(j>0&&r.L[j]>target)break;
+      }
+      if(pts.every(p=>p[0]<-50)||pts.every(p=>p[0]>vw+50))continue;
+      const path=()=>{ctx.beginPath();pts.forEach((p,n)=>n?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));};
+      path();ctx.setLineDash([]);ctx.strokeStyle='#070b22';ctx.lineWidth=lw+4;ctx.globalAlpha=.85;ctx.stroke();
+      ctx.globalAlpha=1;ctx.strokeStyle='#ff5a1f';ctx.lineWidth=lw;ctx.stroke();
+      ctx.strokeStyle='#ffd23f';ctx.lineWidth=Math.max(1,lw*.45);ctx.setLineDash([lw*1.2,lw*2.8]);ctx.lineDashOffset=REDUCED?0:-t/45;ctx.stroke();
+      if(i===0&&pp<1){const [hx,hy]=pts[pts.length-1],s=lw*1.6;ctx.setLineDash([]);ctx.fillStyle='#fff3a3';ctx.fillRect(Math.round(hx-s/2),Math.round(hy-s/2),s,s);
+        ctx.fillStyle='#ff9f43';for(let b=0;b<3;b++){const a=(t/120+b*2.1),d=lw*2;ctx.fillRect(Math.round(hx+Math.cos(a)*d),Math.round(hy+Math.sin(a)*d-lw),Math.ceil(lw*.6),Math.ceil(lw*.6));}}
+    }
+  });
+  ctx.restore();
+}
+document.getElementById('ringX').onclick=closeRing;
+document.getElementById('ringClose').onclick=closeRing;
+document.getElementById('ringReplay').onclick=()=>{ring={t0:performance.now()};};
+
 // ---------- Bucle de dibujo ----------
 let lastT=0, hitBoxes=[];
 function frame(t){
@@ -813,11 +875,12 @@ function frame(t){
     for(const sx of screenXs(p.x,200)){
     if(p.k===2)label(p.t,sx,Y,RZ>3.5?16:8,'#bfe3ff');else label(p.t,sx,Y,RZ>2.6?16:8,'#fff6d8');}}}
 
+  drawRing(t);
   // volcanes
   const u=U();hitBoxes=[];
   const list=V.filter(v=>visible[v.cat]).sort((a,b)=>a.y-b.y);
   for(const v of list){const Y=(v.y-cam.y)*cam.z+vh/2;if(Y<-80||Y>vh+60)continue;
-    for(const sx of screenXs(v.x,60)){const b=drawVolcano(v,sx,Y,u,t);hitBoxes.push({v,b,sx,sy:Y});}}
+    ctx.globalAlpha=ring&&!v.ring?0.3:1;for(const sx of screenXs(v.x,60)){const b=drawVolcano(v,sx,Y,u,t);hitBoxes.push({v,b,sx,sy:Y});}ctx.globalAlpha=1;}
   // nombres
   const placed=[];
   const showAll=cam.z>=3.9;
@@ -912,19 +975,25 @@ addEventListener('keydown',e=>{
   else if(e.key==='ArrowUp'){cam.y-=s;}else if(e.key==='ArrowDown'){cam.y+=s;}
   else if(e.key==='+'||e.key==='='){zoomAt(vw/2,vh/2,cam.z*1.4);}
   else if(e.key==='-'||e.key==='_'){zoomAt(vw/2,vh/2,cam.z/1.4);}
-  else if(e.key==='Escape'){closeCard();closeList();about.hidden=true;return;}
+  else if(e.key==='Escape'){closeRing();closeCard();closeList();about.hidden=true;return;}
   else return;
   clampCam();e.preventDefault();
 });
 document.getElementById('zin').onclick=()=>flyTo(cam.x,cam.y,cam.z*1.8,300);
 document.getElementById('zout').onclick=()=>flyTo(cam.x,cam.y,cam.z/1.8,300);
-document.getElementById('ringBtn').onclick=()=>{closeCard();flyTo(px(-170),(py(60)+py(-50))/2,Math.min(vw/(185/RES),vh/(py(62)-py(-55)))*0.95,1400);};
+document.getElementById('ringBtn').onclick=()=>{closeCard();openRing();
+  const narrow=vw<=640, rc=document.getElementById('ringcard');
+  const side=narrow?0:rc.offsetWidth+30, availH=narrow?Math.max(160,vh-rc.offsetHeight-60):vh;
+  const z=Math.min((vw-side)/(200/RES),availH/(py(-56)-py(62)))*0.95;
+  const x=px(-168)-(side/2)/z, y=(py(62)+py(-56))/2+(narrow?(rc.offsetHeight/2+20)/z:0);
+  flyTo(x,y,z,1400);};
 document.getElementById('zhome').onclick=()=>{const h=home();flyTo(h.x,h.y,h.z,900);};
 
 // ---------- Tarjeta ----------
 const card=document.getElementById('card');
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function select(v,fromMap){
+  if(ring)closeRing();
   selected=v;
   const elev=v.elev==null?'Fisura sin cumbre':v.elev<0?`${(v.elev).toLocaleString('es-MX')} m (bajo el mar)`:`${v.elev.toLocaleString('es-MX')} m`;
   card.innerHTML=`<div class="top"><h3>${esc(v.name)}</h3><button class="x" id="cx" aria-label="Cerrar ficha">×</button></div>
@@ -1031,5 +1100,6 @@ async function upgradeCoasts(){
 }
 boot();
 </script>
+
 </body>
 </html>
