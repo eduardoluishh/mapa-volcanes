@@ -64,6 +64,13 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .chip{display:flex;align-items:center;gap:8px;padding:6px 10px;font-family:var(--f-display);font-size:12px;letter-spacing:.5px;background:var(--box);border:3px solid var(--paper);box-shadow:0 0 0 3px var(--ink)}
 .chip[aria-pressed="false"]{opacity:.45;border-style:dashed}
 .chip .n{font-variant-numeric:tabular-nums;color:var(--muted)}
+.favchip .star{color:var(--gold);font-size:13px;line-height:1}
+.favchip[aria-pressed="false"]{opacity:1;border-style:solid}
+.favchip[aria-pressed="true"]{background:var(--gold);color:#1a1430}
+.favchip[aria-pressed="true"] .star,.favchip[aria-pressed="true"] .n{color:#1a1430}
+.favchip.nudge{animation:nudge .5s steps(4)}
+@keyframes nudge{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.pbtn.fav[aria-pressed="true"]{background:var(--gold);color:#1a1430;box-shadow:inset -3px -3px 0 #c99a00,inset 3px 3px 0 #ffe98a,4px 4px 0 rgba(7,11,34,.5)}
 
 /* Botones de la derecha */
 .tr{position:fixed;z-index:5;top:calc(16px + env(safe-area-inset-top,0px));right:calc(16px + env(safe-area-inset-right,0px));display:flex;gap:12px}
@@ -207,12 +214,13 @@ body.has-card .foot{display:none}
   <p class="src">Fuentes: <a href="https://education.nationalgeographic.org/resource/plate-tectonics-ring-fire/" target="_blank" rel="noopener">National Geographic</a> · <a href="https://www.britannica.com/place/Ring-of-Fire" target="_blank" rel="noopener">Britannica</a></p>
   <div class="actions"><button class="pbtn lava" id="ringReplay">VER DE NUEVO</button><button class="pbtn ghost" id="ringClose">CERRAR</button></div>
 </section>
-<footer class="attrib">Mapa: <a href="https://eduardoluis.blog" target="_blank" rel="noopener">Eduardo Luis</a> · Datos: <a href="https://volcano.si.edu/" target="_blank" rel="noopener">Global Volcanism Program, Smithsonian</a> y Wikipedia · nov. 2026 · <button type="button" id="srcBtn">Fuentes</button></footer>
+<footer class="attrib"><span id="visits" hidden></span>Mapa: <a href="https://eduardoluis.blog" target="_blank" rel="noopener">Eduardo Luis</a> · Datos: <a href="https://volcano.si.edu/" target="_blank" rel="noopener">Global Volcanism Program, Smithsonian</a> y Wikipedia · nov. 2026 · <button type="button" id="srcBtn">Fuentes</button></footer>
 
 <div class="about box" id="about" hidden role="dialog" aria-label="Acerca del mapa">
   <h2>Acerca de este mapa</h2>
   <p>Arrastra para moverte, usa la rueda o pellizca para hacer zoom y toca un volcán para ver su ficha. Las flechas del teclado y + / − también funcionan.</p>
-  <p><b>Activo:</b> erupción registrada en 2020 o después. <b>Histórico:</b> desde el año 1500. <b>Dormido:</b> antes de 1500, sin fecha o del Pleistoceno.</p>
+  <p><b>Activo:</b> tuvo al menos una erupción en los últimos 50 años (desde 1976). <b>Dormido:</b> su última erupción fue antes, no tiene fecha registrada o es del Pleistoceno. Dormido no significa apagado: muchos pueden volver a despertar.</p>
+  <p><b>Favoritos:</b> toca ☆ en la ficha de un volcán para guardarlo. Se guardan solo en este navegador.</p>
   <p><b>Fuentes.</b> Altitud, última erupción, tipo y categoría vienen del <a href="https://volcano.si.edu/" target="_blank" rel="noopener">Global Volcanism Program</a> del Smithsonian (base Volcanoes of the World, consulta del 19 de noviembre de 2026). Cada ficha enlaza a su volcán en el GVP. Cuando el GVP agrupa varios conos en un solo campo volcánico (Paricutín, Jorullo, Xitle, Sunset Crater, Laki), la altitud o la fecha de ese cono vienen de Wikipedia, y la ficha lo indica. Los datos curiosos se contrastaron con los resúmenes geológicos del GVP y con Wikipedia en inglés y español, que citan los estudios originales.</p>
   <p style="color:var(--muted);font-size:13px">Las costas están simplificadas a propósito: es un mapa para explorar, no para navegar en barco.</p>
   <button class="pbtn" id="closeAbout">ENTENDIDO</button>
@@ -235,176 +243,176 @@ const RAW = [
 ["kanaga", "Kanaga", "EE. UU. (Alaska)", 51.92, -177.16, 1307, "2023", "a", "Estratovolcán", "En las Aleutianas hay más volcanes que vecinos.", "am", 311110, ""],
 ["great-sitkin", "Great Sitkin", "EE. UU. (Alaska)", 52.08, -176.13, 1740, "2026", "a", "Estratovolcán", "Lleva años sacando lava despacito, como quien no quiere la cosa.", "am", 311120, ""],
 ["cleveland", "Cleveland", "EE. UU. (Alaska)", 52.82, -169.94, 1730, "2020", "a", "Estratovolcán", "De los más inquietos de Alaska. Su público principal son las focas.", "am", 311240, ""],
-["okmok", "Okmok", "EE. UU. (Alaska)", 53.43, -168.13, 1073, "2008", "h", "Volcán en escudo", "Un estudio de 2020 relaciona su erupción del 43 a.C. con un clima extremo en tiempos de la República romana y el Egipto de Cleopatra.", "am", 311290, ""],
-["bogoslof", "Bogoslof", "EE. UU. (Alaska)", 53.93, -168.03, 150, "2017", "h", "Estratovolcán", "Una isla que crece y se encoge según su humor eruptivo.", "am", 311300, ""],
-["makushin", "Makushin", "EE. UU. (Alaska)", 53.89, -166.92, 1800, "1995", "h", "Estratovolcán", "Vigila Dutch Harbor, el puerto de los barcos cangrejeros.", "am", 311310, ""],
+["okmok", "Okmok", "EE. UU. (Alaska)", 53.43, -168.13, 1073, "2008", "a", "Volcán en escudo", "Un estudio de 2020 relaciona su erupción del 43 a.C. con un clima extremo en tiempos de la República romana y el Egipto de Cleopatra.", "am", 311290, ""],
+["bogoslof", "Bogoslof", "EE. UU. (Alaska)", 53.93, -168.03, 150, "2017", "a", "Estratovolcán", "Una isla que crece y se encoge según su humor eruptivo.", "am", 311300, ""],
+["makushin", "Makushin", "EE. UU. (Alaska)", 53.89, -166.92, 1800, "1995", "a", "Estratovolcán", "Vigila Dutch Harbor, el puerto de los barcos cangrejeros.", "am", 311310, ""],
 ["shishaldin", "Shishaldin", "EE. UU. (Alaska)", 54.76, -163.97, 2857, "2023", "a", "Estratovolcán", "Un cono casi perfecto. Candidato oficial a volcán de póster.", "am", 311360, ""],
 ["pavlof", "Pavlof", "EE. UU. (Alaska)", 55.42, -161.89, 2493, "2022", "a", "Estratovolcán", "De los más activos de Alaska. No, no saliva cuando suena una campana.", "am", 312030, ""],
 ["veniaminof", "Veniaminof", "EE. UU. (Alaska)", 56.17, -159.38, 2507, "2021", "a", "Estratovolcán", "Tiene la cima llena de glaciar y un cono que hace erupción entre el hielo.", "am", 312070, ""],
-["aniakchak", "Aniakchak", "EE. UU. (Alaska)", 56.88, -158.21, 1341, "1931", "h", "Caldera", "Es de los parques nacionales menos visitados de EE. UU. Tranquilidad garantizada (casi).", "am", 312090, ""],
-["novarupta", "Novarupta", "EE. UU. (Alaska)", 58.27, -155.16, 841, "1912", "h", "Caldera", "La mayor erupción del siglo XX. Dejó el Valle de las Diez Mil Humaredas.", "am", 312180, ""],
-["augustine", "Augustine", "EE. UU. (Alaska)", 59.36, -153.43, 1218, "2006", "h", "Domo de lava", "Una isla-volcán que se desmorona y se reconstruye cada tanto.", "am", 313010, ""],
-["redoubt", "Redoubt", "EE. UU. (Alaska)", 60.49, -152.74, 3108, "2009", "h", "Estratovolcán", "En 1989 su ceniza apagó los cuatro motores de un 747. Por suerte volvieron a encender.", "am", 313030, ""],
-["spurr", "Spurr", "EE. UU. (Alaska)", 61.3, -152.25, 3374, "1992", "h", "Estratovolcán", "En 1992 le llovió ceniza a Anchorage.", "am", 313040, ""],
+["aniakchak", "Aniakchak", "EE. UU. (Alaska)", 56.88, -158.21, 1341, "1931", "d", "Caldera", "Es de los parques nacionales menos visitados de EE. UU. Tranquilidad garantizada (casi).", "am", 312090, ""],
+["novarupta", "Novarupta", "EE. UU. (Alaska)", 58.27, -155.16, 841, "1912", "d", "Caldera", "La mayor erupción del siglo XX. Dejó el Valle de las Diez Mil Humaredas.", "am", 312180, ""],
+["augustine", "Augustine", "EE. UU. (Alaska)", 59.36, -153.43, 1218, "2006", "a", "Domo de lava", "Una isla-volcán que se desmorona y se reconstruye cada tanto.", "am", 313010, ""],
+["redoubt", "Redoubt", "EE. UU. (Alaska)", 60.49, -152.74, 3108, "2009", "a", "Estratovolcán", "En 1989 su ceniza apagó los cuatro motores de un 747. Por suerte volvieron a encender.", "am", 313030, ""],
+["spurr", "Spurr", "EE. UU. (Alaska)", 61.3, -152.25, 3374, "1992", "a", "Estratovolcán", "En 1992 le llovió ceniza a Anchorage.", "am", 313040, ""],
 ["edziza", "Monte Edziza", "Canadá", 57.72, -130.63, 2786, "950 d.C.", "d", "Estratovolcán", "Los tahltan trabajan su obsidiana desde hace miles de años.", "am", 320060, ""],
-["tseax", "Tseax", "Canadá", 55.11, -128.9, 612, "1690", "h", "Cono de escoria", "Según la tradición nisga'a, su lava arrasó aldeas: se considera el peor desastre natural de Canadá por número de muertes.", "am", 320100, ""],
+["tseax", "Tseax", "Canadá", 55.11, -128.9, 612, "1690", "d", "Cono de escoria", "Según la tradición nisga'a, su lava arrasó aldeas: se considera el peor desastre natural de Canadá por número de muertes.", "am", 320100, ""],
 ["meager", "Monte Meager", "Canadá", 50.64, -123.5, 2680, "410 a.C.", "d", "Complejo volcánico", "Tuvo la erupción reciente más grande de Canadá, hace unos 2,400 años.", "am", 320180, ""],
-["baker", "Monte Baker", "EE. UU.", 48.78, -121.81, 3285, "1880", "h", "Estratovolcán", "Récord de nieve en un invierno: unos 29 metros. Sí, metros.", "am", 321010, ""],
-["glacier-peak", "Glacier Peak", "EE. UU.", 48.11, -121.11, 3213, "1700", "h", "Estratovolcán", "Tan escondido que no se ve desde ninguna ciudad grande.", "am", 321020, ""],
+["baker", "Monte Baker", "EE. UU.", 48.78, -121.81, 3285, "1880", "d", "Estratovolcán", "Récord de nieve en un invierno: unos 29 metros. Sí, metros.", "am", 321010, ""],
+["glacier-peak", "Glacier Peak", "EE. UU.", 48.11, -121.11, 3213, "1700", "d", "Estratovolcán", "Tan escondido que no se ve desde ninguna ciudad grande.", "am", 321020, ""],
 ["rainier", "Monte Rainier", "EE. UU.", 46.85, -121.76, 4392, "1450", "d", "Estratovolcán", "Considerado de los más peligrosos de EE. UU. por sus lahares hacia Seattle y Tacoma.", "am", 321030, ""],
-["st-helens", "Monte Santa Helena", "EE. UU.", 46.2, -122.18, 2549, "2008", "h", "Estratovolcán", "En 1980 perdió 400 metros de altura en una sola mañana.", "am", 321050, ""],
+["st-helens", "Monte Santa Helena", "EE. UU.", 46.2, -122.18, 2549, "2008", "a", "Estratovolcán", "En 1980 perdió 400 metros de altura en una sola mañana.", "am", 321050, ""],
 ["adams", "Monte Adams", "EE. UU.", 46.21, -121.49, 3742, "950 d.C.", "d", "Estratovolcán", "El grandote tranquilo de la Cordillera de las Cascadas.", "am", 321040, ""],
-["hood", "Monte Hood", "EE. UU.", 45.37, -121.7, 3426, "1866", "h", "Estratovolcán", "Portland lo ve todos los días y procura no pensar mucho en él.", "am", 322010, ""],
+["hood", "Monte Hood", "EE. UU.", 45.37, -121.7, 3426, "1866", "d", "Estratovolcán", "Portland lo ve todos los días y procura no pensar mucho en él.", "am", 322010, ""],
 ["mazama", "Lago del Cráter (Mazama)", "EE. UU.", 42.93, -122.12, 2487, "2,850 a.C.", "d", "Caldera", "Se hundió en su propia erupción hace unos 7,700 años y dejó el lago más profundo de EE. UU.", "am", 322160, ""],
 ["newberry", "Newberry", "EE. UU.", 43.72, -121.23, 2434, "690 d.C.", "d", "Volcán en escudo", "Su Gran Flujo de Obsidiana es vidrio volcánico en cantidades absurdas.", "am", 322110, ""],
 ["shasta", "Monte Shasta", "EE. UU.", 41.41, -122.19, 4317, "1250", "d", "Estratovolcán", "Hay quien jura que dentro hay una ciudad secreta. Los geólogos no la encuentran.", "am", 323010, ""],
-["lassen", "Pico Lassen", "EE. UU.", 40.49, -121.51, 3187, "1917", "h", "Estratovolcán", "Hizo erupción entre 1914 y 1917 y lo convirtieron en parque nacional.", "am", 323080, ""],
+["lassen", "Pico Lassen", "EE. UU.", 40.49, -121.51, 3187, "1917", "d", "Estratovolcán", "Hizo erupción entre 1914 y 1917 y lo convirtieron en parque nacional.", "am", 323080, ""],
 ["long-valley", "Cráteres Mono-Inyo (Long Valley)", "EE. UU.", 37.7, -118.87, 2796, "1380", "d", "Domo de lava", "La caldera de Long Valley tiene 760,000 años; estos cráteres son sus hijos jóvenes.", "am", 323120, ""],
 ["yellowstone", "Yellowstone", "EE. UU.", 44.43, -110.67, 2805, "Pleistoceno", "d", "Caldera", "El supervolcán más famoso. Sus géiseres hacen el trabajo del día a día.", "am", 325010, ""],
 ["sunset-crater", "Sunset Crater", "EE. UU.", 35.37, -111.5, 2451, "1075", "d", "Cono de escoria", "Los ancestros puebloanos lo vieron nacer en pleno Arizona.", "am", 329020, "Altitud: Servicio de Parques Nacionales de EE. UU. (vía Wikipedia)"],
 ["tres-virgenes", "Las Tres Vírgenes", "México", 27.47, -112.59, 1934, "Pleistoceno", "d", "Estratovolcán", "Tres volcanes en fila en pleno desierto de Baja California Sur.", "am", 341010, ""],
-["barcena", "Bárcena", "México (Isla San Benedicto)", 19.3, -110.82, 332, "1953", "h", "Cono de escoria", "Nació en 1952 y en semanas cubrió de ceniza toda su isla.", "am", 341020, ""],
-["everman", "Everman (Isla Socorro)", "México (Isla Socorro)", 18.78, -110.95, 1050, "1994", "h", "Volcán en escudo", "Su última erupción fue bajo el mar, frente a la isla.", "am", 341021, ""],
-["ceboruco", "Ceboruco", "México", 21.12, -104.51, 2280, "1875", "h", "Estratovolcán", "Sus coladas de lava en Nayarit parecen un pastel de chocolate gigante.", "am", 341030, ""],
-["colima", "Volcán de Colima", "México", 19.51, -103.62, 3850, "2019", "h", "Estratovolcán", "De los más activos de México. Los vecinos lo llaman Volcán de Fuego.", "am", 341040, ""],
-["paricutin", "Paricutín", "México", 19.49, -102.25, 2800, "1952", "h", "Cono de escoria", "Nació en 1943 en la milpa de Dionisio Pulido. Literalmente un volcán bebé.", "am", 341060, "Altitud y fecha: Wikipedia"],
-["jorullo", "Jorullo", "México", 19.03, -101.67, 1330, "1774", "h", "Cono de escoria", "Antes que el Paricutín ya había nacido en un campo de Michoacán, en 1759.", "am", 341060, "Altitud y fecha: Wikipedia"],
+["barcena", "Bárcena", "México (Isla San Benedicto)", 19.3, -110.82, 332, "1953", "d", "Cono de escoria", "Nació en 1952 y en semanas cubrió de ceniza toda su isla.", "am", 341020, ""],
+["everman", "Everman (Isla Socorro)", "México (Isla Socorro)", 18.78, -110.95, 1050, "1994", "a", "Volcán en escudo", "Su última erupción fue bajo el mar, frente a la isla.", "am", 341021, ""],
+["ceboruco", "Ceboruco", "México", 21.12, -104.51, 2280, "1875", "d", "Estratovolcán", "Sus coladas de lava en Nayarit parecen un pastel de chocolate gigante.", "am", 341030, ""],
+["colima", "Volcán de Colima", "México", 19.51, -103.62, 3850, "2019", "a", "Estratovolcán", "De los más activos de México. Los vecinos lo llaman Volcán de Fuego.", "am", 341040, ""],
+["paricutin", "Paricutín", "México", 19.49, -102.25, 2800, "1952", "d", "Cono de escoria", "Nació en 1943 en la milpa de Dionisio Pulido. Literalmente un volcán bebé.", "am", 341060, "Altitud y fecha: Wikipedia"],
+["jorullo", "Jorullo", "México", 19.03, -101.67, 1330, "1774", "d", "Cono de escoria", "Antes que el Paricutín ya había nacido en un campo de Michoacán, en 1759.", "am", 341060, "Altitud y fecha: Wikipedia"],
 ["xitle", "Xitle", "México", 19.25, -99.22, 3100, "400 d.C.", "d", "Cono de escoria", "Su lava sepultó Cuicuilco. Hoy encima está Ciudad Universitaria.", "am", 341080, "Altitud: Wikipedia; fecha: GVP"],
 ["toluca", "Nevado de Toluca", "México", 19.11, -99.76, 4680, "1,350 a.C.", "d", "Estratovolcán", "En su cráter hay dos lagos: el del Sol y el de la Luna.", "am", 341070, ""],
 ["popocatepetl", "Popocatépetl", "México", 19.02, -98.62, 5393, "2026", "a", "Estratovolcán", "Don Goyo saluda a CDMX y a Puebla con fumarolas casi a diario.", "am", 341090, ""],
 ["iztaccihuatl", "Iztaccíhuatl", "México", 19.18, -98.64, 5230, "Sin fecha registrada", "d", "Estratovolcán", "La Mujer Dormida. Lleva miles de años en la misma siesta.", "am", 341082, ""],
-["orizaba", "Pico de Orizaba", "México", 19.03, -97.27, 5564, "1846", "h", "Estratovolcán", "La montaña más alta de México y el volcán más alto de Norteamérica.", "am", 341100, ""],
-["san-martin", "San Martín Tuxtla", "México", 18.57, -95.17, 1660, "1796", "h", "Campo volcánico", "Su erupción de finales del siglo XVIII asustó a medio Veracruz.", "am", 341110, ""],
-["chichon", "El Chichón", "México", 17.36, -93.23, 1150, "1982", "h", "Domo de lava", "Despertó en 1982 tras siglos de silencio y enfrió un poquito el planeta.", "am", 341120, ""],
-["tacana", "Tacaná", "México / Guatemala", 15.13, -92.11, 4064, "1986", "h", "Estratovolcán", "Tiene un pie en México y otro en Guatemala.", "am", 341130, ""],
+["orizaba", "Pico de Orizaba", "México", 19.03, -97.27, 5564, "1846", "d", "Estratovolcán", "La montaña más alta de México y el volcán más alto de Norteamérica.", "am", 341100, ""],
+["san-martin", "San Martín Tuxtla", "México", 18.57, -95.17, 1660, "1796", "d", "Campo volcánico", "Su erupción de finales del siglo XVIII asustó a medio Veracruz.", "am", 341110, ""],
+["chichon", "El Chichón", "México", 17.36, -93.23, 1150, "1982", "a", "Domo de lava", "Despertó en 1982 tras siglos de silencio y enfrió un poquito el planeta.", "am", 341120, ""],
+["tacana", "Tacaná", "México / Guatemala", 15.13, -92.11, 4064, "1986", "a", "Estratovolcán", "Tiene un pie en México y otro en Guatemala.", "am", 341130, ""],
 ["tajumulco", "Tajumulco", "Guatemala", 15.04, -91.9, 4203, "Sin fecha registrada", "d", "Estratovolcán", "El punto más alto de Centroamérica.", "am", 342020, ""],
 ["santiaguito", "Santa María / Santiaguito", "Guatemala", 14.76, -91.55, 3745, "2026", "a", "Estratovolcán", "En 1922 le nació Santiaguito en el flanco, y desde entonces no para.", "am", 342030, ""],
-["atitlan", "Atitlán", "Guatemala", 14.58, -91.19, 3535, "1853", "h", "Estratovolcán", "Se asoma sobre uno de los lagos más bonitos del mundo.", "am", 342060, ""],
-["acatenango", "Acatenango", "Guatemala", 14.5, -90.88, 3976, "1972", "h", "Estratovolcán", "El mirador favorito para ver al Fuego hacer berrinches.", "am", 342080, ""],
+["atitlan", "Atitlán", "Guatemala", 14.58, -91.19, 3535, "1853", "d", "Estratovolcán", "Se asoma sobre uno de los lagos más bonitos del mundo.", "am", 342060, ""],
+["acatenango", "Acatenango", "Guatemala", 14.5, -90.88, 3976, "1972", "d", "Estratovolcán", "El mirador favorito para ver al Fuego hacer berrinches.", "am", 342080, ""],
 ["fuego", "Volcán de Fuego", "Guatemala", 14.47, -90.88, 3799, "2026", "a", "Estratovolcán", "Hace explosiones pequeñas cada pocos minutos. Puntualísimo.", "am", 342090, ""],
 ["agua", "Volcán de Agua", "Guatemala", 14.47, -90.74, 3760, "Sin fecha registrada", "d", "Estratovolcán", "Le dicen de Agua por la inundación de lodo que arrasó la capital colonial en 1541.", "am", 342100, ""],
 ["pacaya", "Pacaya", "Guatemala", 14.38, -90.6, 2569, "2021", "a", "Complejo volcánico", "Hay turistas que asan malvaviscos junto a su lava. En serio.", "am", 342110, ""],
-["santa-ana", "Santa Ana (Ilamatepec)", "El Salvador", 13.85, -89.63, 2381, "2005", "h", "Estratovolcán", "Su cráter guarda una laguna color verde ácido.", "am", 343020, ""],
-["izalco", "Izalco", "El Salvador", 13.81, -89.63, 1950, "1966", "h", "Estratovolcán", "El Faro del Pacífico: brilló de noche casi 200 años seguidos.", "am", 343030, ""],
+["santa-ana", "Santa Ana (Ilamatepec)", "El Salvador", 13.85, -89.63, 2381, "2005", "a", "Estratovolcán", "Su cráter guarda una laguna color verde ácido.", "am", 343020, ""],
+["izalco", "Izalco", "El Salvador", 13.81, -89.63, 1950, "1966", "d", "Estratovolcán", "El Faro del Pacífico: brilló de noche casi 200 años seguidos.", "am", 343030, ""],
 ["san-miguel", "San Miguel (Chaparrastique)", "El Salvador", 13.43, -88.27, 2130, "2023", "a", "Estratovolcán", "Simétrico, fotogénico y bastante gruñón.", "am", 343100, ""],
 ["san-cristobal", "San Cristóbal", "Nicaragua", 12.7, -87.0, 1745, "2024", "a", "Estratovolcán", "El volcán más alto de Nicaragua.", "am", 344020, ""],
 ["telica", "Telica", "Nicaragua", 12.6, -86.85, 1036, "2026", "a", "Estratovolcán", "Algunas noches se ve brillar el fondo de su cráter.", "am", 344040, ""],
-["cerro-negro", "Cerro Negro", "Nicaragua", 12.51, -86.7, 728, "1999", "h", "Cono de escoria", "Aquí se inventó el volcano boarding: bajar en tabla por la ceniza.", "am", 344070, ""],
-["momotombo", "Momotombo", "Nicaragua", 12.42, -86.54, 1270, "2016", "h", "Estratovolcán", "Despertó en 2015 después de 110 años de siesta.", "am", 344090, ""],
+["cerro-negro", "Cerro Negro", "Nicaragua", 12.51, -86.7, 728, "1999", "a", "Cono de escoria", "Aquí se inventó el volcano boarding: bajar en tabla por la ceniza.", "am", 344070, ""],
+["momotombo", "Momotombo", "Nicaragua", 12.42, -86.54, 1270, "2016", "a", "Estratovolcán", "Despertó en 2015 después de 110 años de siesta.", "am", 344090, ""],
 ["masaya", "Masaya", "Nicaragua", 11.98, -86.16, 594, "2026", "a", "Caldera", "Los españoles la llamaron la Boca del Infierno e intentaron sacarle oro a su lava. Era basalto.", "am", 344100, ""],
 ["concepcion", "Concepción", "Nicaragua", 11.54, -85.62, 1700, "2024", "a", "Estratovolcán", "Forma media isla de Ometepe, en pleno lago de Nicaragua.", "am", 344120, ""],
 ["rincon", "Rincón de la Vieja", "Costa Rica", 10.83, -85.32, 1729, "2026", "a", "Complejo volcánico", "Tiene ollas de lodo burbujeante, como un jacuzzi muy sucio.", "am", 345020, ""],
-["arenal", "Arenal", "Costa Rica", 10.46, -84.7, 1670, "2010", "h", "Estratovolcán", "Estuvo activo de 1968 a 2010 sin descanso. Hoy es pura postal.", "am", 345033, ""],
+["arenal", "Arenal", "Costa Rica", 10.46, -84.7, 1670, "2010", "a", "Estratovolcán", "Estuvo activo de 1968 a 2010 sin descanso. Hoy es pura postal.", "am", 345033, ""],
 ["poas", "Poás", "Costa Rica", 10.2, -84.23, 2697, "2026", "a", "Estratovolcán", "Uno de los cráteres activos más anchos del mundo.", "am", 345040, ""],
-["irazu", "Irazú", "Costa Rica", 9.98, -83.85, 3436, "1977", "h", "Estratovolcán", "En días despejados, desde su cima se ven los dos océanos.", "am", 345060, ""],
+["irazu", "Irazú", "Costa Rica", 9.98, -83.85, 3436, "1977", "a", "Estratovolcán", "En días despejados, desde su cima se ven los dos océanos.", "am", 345060, ""],
 ["turrialba", "Turrialba", "Costa Rica", 10.03, -83.77, 3340, "2022", "a", "Estratovolcán", "Cuando estornuda, cierran el aeropuerto de San José.", "am", 345070, ""],
-["baru", "Volcán Barú", "Panamá", 8.81, -82.54, 3474, "1550", "h", "Estratovolcán", "Desde su cima también se ven los dos océanos. Competencia directa del Irazú.", "am", 346010, ""],
+["baru", "Volcán Barú", "Panamá", 8.81, -82.54, 3474, "1550", "d", "Estratovolcán", "Desde su cima también se ven los dos océanos. Competencia directa del Irazú.", "am", 346010, ""],
 ["liamuiga", "Monte Liamuiga", "San Cristóbal y Nieves", 17.37, -62.8, 1156, "160 d.C.", "d", "Estratovolcán", "Liamuiga, el nombre kalinago de la isla, significa tierra fértil.", "am", 360030, ""],
-["soufriere-hills", "Soufrière Hills", "Montserrat", 16.72, -62.18, 915, "2013", "h", "Estratovolcán", "Dejó a Montserrat sin su capital, Plymouth, en 1997.", "am", 360050, ""],
-["grande-soufriere", "La Grande Soufrière", "Guadalupe", 16.04, -61.66, 1467, "1977", "h", "Estratovolcán", "La cumbre más alta de las Antillas Menores.", "am", 360060, ""],
-["pelee", "Montaña Pelée", "Martinica", 14.81, -61.17, 1372, "1932", "h", "Estratovolcán", "En 1902 destruyó Saint-Pierre. Uno de los poquísimos sobrevivientes fue un preso en su celda.", "am", 360120, ""],
+["soufriere-hills", "Soufrière Hills", "Montserrat", 16.72, -62.18, 915, "2013", "a", "Estratovolcán", "Dejó a Montserrat sin su capital, Plymouth, en 1997.", "am", 360050, ""],
+["grande-soufriere", "La Grande Soufrière", "Guadalupe", 16.04, -61.66, 1467, "1977", "a", "Estratovolcán", "La cumbre más alta de las Antillas Menores.", "am", 360060, ""],
+["pelee", "Montaña Pelée", "Martinica", 14.81, -61.17, 1372, "1932", "d", "Estratovolcán", "En 1902 destruyó Saint-Pierre. Uno de los poquísimos sobrevivientes fue un preso en su celda.", "am", 360120, ""],
 ["la-soufriere", "La Soufrière", "San Vicente", 13.33, -61.18, 1220, "2021", "a", "Estratovolcán", "Su erupción de 2021 obligó a evacuar a unas 20,000 personas.", "am", 360150, ""],
-["kick-em-jenny", "Kick 'em Jenny", "Granada", 12.3, -61.64, -185, "2017", "h", "Complejo volcánico", "Está bajo el mar. Los barcos tienen prohibido pasar justo encima.", "am", 360160, ""],
+["kick-em-jenny", "Kick 'em Jenny", "Granada", 12.3, -61.64, -185, "2017", "a", "Complejo volcánico", "Está bajo el mar. Los barcos tienen prohibido pasar justo encima.", "am", 360160, ""],
 ["ruiz", "Nevado del Ruiz", "Colombia", 4.89, -75.32, 5279, "2026", "a", "Estratovolcán", "Su erupción de 1985 causó la tragedia de Armero.", "am", 351020, ""],
-["huila", "Nevado del Huila", "Colombia", 2.93, -76.03, 5364, "2012", "h", "Estratovolcán", "El volcán más alto de Colombia.", "am", 351050, ""],
+["huila", "Nevado del Huila", "Colombia", 2.93, -76.03, 5364, "2012", "a", "Estratovolcán", "El volcán más alto de Colombia.", "am", 351050, ""],
 ["purace", "Puracé", "Colombia", 2.32, -76.4, 4650, "2026", "a", "Estratovolcán", "Huele a azufre desde lejos. Mucho.", "am", 351060, ""],
-["galeras", "Galeras", "Colombia", 1.22, -77.37, 4276, "2014", "h", "Complejo volcánico", "La ciudad de Pasto vive a sus pies, a unos 9 km del cráter.", "am", 351080, ""],
-["cumbal", "Cumbal", "Colombia", 0.98, -77.88, 4764, "1926", "h", "Estratovolcán", "Casi en la frontera con Ecuador, cubierto de glaciar.", "am", 351100, ""],
+["galeras", "Galeras", "Colombia", 1.22, -77.37, 4276, "2014", "a", "Complejo volcánico", "La ciudad de Pasto vive a sus pies, a unos 9 km del cráter.", "am", 351080, ""],
+["cumbal", "Cumbal", "Colombia", 0.98, -77.88, 4764, "1926", "d", "Estratovolcán", "Casi en la frontera con Ecuador, cubierto de glaciar.", "am", 351100, ""],
 ["reventador", "Reventador", "Ecuador", -0.08, -77.66, 3562, "2026", "a", "Estratovolcán", "Con ese nombre, lo raro sería que estuviera tranquilo.", "am", 352010, ""],
-["pichincha", "Guagua Pichincha", "Ecuador", -0.17, -78.6, 4784, "2002", "h", "Estratovolcán", "En 1999 cubrió Quito de ceniza. Los quiteños lo vigilan de reojo.", "am", 352020, ""],
+["pichincha", "Guagua Pichincha", "Ecuador", -0.17, -78.6, 4784, "2002", "a", "Estratovolcán", "En 1999 cubrió Quito de ceniza. Los quiteños lo vigilan de reojo.", "am", 352020, ""],
 ["cotopaxi", "Cotopaxi", "Ecuador", -0.68, -78.44, 5911, "2023", "a", "Estratovolcán", "Uno de los volcanes activos más altos del mundo, con glaciar incluido.", "am", 352050, ""],
 ["chimborazo", "Chimborazo", "Ecuador", -1.47, -78.82, 6261, "550 d.C.", "d", "Estratovolcán", "Su cima es el punto más lejano del centro de la Tierra. Toma eso, Everest.", "am", 352071, ""],
-["tungurahua", "Tungurahua", "Ecuador", -1.47, -78.44, 5023, "2016", "h", "Estratovolcán", "Mama Tungurahua estuvo activa de 1999 a 2016.", "am", 352080, ""],
+["tungurahua", "Tungurahua", "Ecuador", -1.47, -78.44, 5023, "2016", "a", "Estratovolcán", "Mama Tungurahua estuvo activa de 1999 a 2016.", "am", 352080, ""],
 ["sangay", "Sangay", "Ecuador", -2.0, -78.34, 5286, "2026", "a", "Estratovolcán", "Activo casi sin pausa desde el siglo XVII.", "am", 352090, ""],
 ["wolf", "Volcán Wolf", "Ecuador (Galápagos)", 0.02, -91.35, 1710, "2022", "a", "Volcán en escudo", "El punto más alto de Galápagos y hogar de la única iguana rosada del mundo.", "am", 353020, ""],
 ["fernandina", "Fernandina", "Ecuador (Galápagos)", -0.37, -91.55, 1476, "2024", "a", "Volcán en escudo", "De los más activos de Galápagos. Las iguanas marinas ni se inmutan.", "am", 353010, ""],
-["sierra-negra", "Sierra Negra", "Ecuador (Galápagos)", -0.83, -91.17, 1124, "2018", "h", "Volcán en escudo", "Tiene una de las calderas más grandes del mundo: unos 7 × 10 km.", "am", 353050, ""],
+["sierra-negra", "Sierra Negra", "Ecuador (Galápagos)", -0.83, -91.17, 1124, "2018", "a", "Volcán en escudo", "Tiene una de las calderas más grandes del mundo: unos 7 × 10 km.", "am", 353050, ""],
 ["sabancaya", "Sabancaya", "Perú", -15.78, -71.85, 5960, "2026", "a", "Estratovolcán", "Su nombre en quechua se traduce como lengua de fuego.", "am", 354006, ""],
-["misti", "Misti", "Perú", -16.29, -71.41, 5793, "1985", "h", "Estratovolcán", "Arequipa, la Ciudad Blanca, está construida con su roca: el sillar.", "am", 354010, ""],
+["misti", "Misti", "Perú", -16.29, -71.41, 5793, "1985", "a", "Estratovolcán", "Arequipa, la Ciudad Blanca, está construida con su roca: el sillar.", "am", 354010, ""],
 ["ubinas", "Ubinas", "Perú", -16.36, -70.9, 5608, "2024", "a", "Estratovolcán", "El volcán más activo de Perú.", "am", 354020, ""],
-["huaynaputina", "Huaynaputina", "Perú", -16.61, -70.85, 4679, "1600", "h", "Estratovolcán", "La mayor erupción histórica de Sudamérica. Se le relaciona con la hambruna rusa de 1601-1603.", "am", 354030, ""],
+["huaynaputina", "Huaynaputina", "Perú", -16.61, -70.85, 4679, "1600", "d", "Estratovolcán", "La mayor erupción histórica de Sudamérica. Se le relaciona con la hambruna rusa de 1601-1603.", "am", 354030, ""],
 ["parinacota", "Parinacota", "Chile / Bolivia", -18.17, -69.15, 6336, "290 d.C.", "d", "Estratovolcán", "Se refleja en el lago Chungará como fondo de pantalla.", "am", 355012, ""],
-["guallatiri", "Guallatiri", "Chile", -18.42, -69.09, 6071, "1960", "h", "Estratovolcán", "Tiene fumarolas activas a más de 6,000 metros.", "am", 355020, ""],
+["guallatiri", "Guallatiri", "Chile", -18.42, -69.09, 6071, "1960", "d", "Estratovolcán", "Tiene fumarolas activas a más de 6,000 metros.", "am", 355020, ""],
 ["uturuncu", "Uturuncu", "Bolivia", -22.27, -67.18, 6008, "Pleistoceno", "d", "Estratovolcán", "Le dicen volcán zombi: está dormido, pero el suelo a su alrededor se infla.", "am", 355838, ""],
 ["lascar", "Láscar", "Chile", -23.37, -67.73, 5592, "2026", "a", "Estratovolcán", "El más activo del norte de Chile.", "am", 355100, ""],
-["llullaillaco", "Llullaillaco", "Chile / Argentina", -24.72, -68.53, 6739, "1877", "h", "Estratovolcán", "En su cima hallaron momias incas: el sitio arqueológico más alto del mundo.", "am", 355110, ""],
+["llullaillaco", "Llullaillaco", "Chile / Argentina", -24.72, -68.53, 6739, "1877", "d", "Estratovolcán", "En su cima hallaron momias incas: el sitio arqueológico más alto del mundo.", "am", 355110, ""],
 ["ojos-del-salado", "Ojos del Salado", "Chile / Argentina", -27.11, -68.54, 6879, "750 d.C.", "d", "Estratovolcán", "El volcán activo más alto del mundo, según el Smithsonian.", "am", 355130, ""],
-["tupungatito", "Tupungatito", "Chile", -33.4, -69.82, 5660, "1987", "h", "Estratovolcán", "El volcán activo más cercano a Santiago.", "am", 357010, ""],
+["tupungatito", "Tupungatito", "Chile", -33.4, -69.82, 5660, "1987", "a", "Estratovolcán", "El volcán activo más cercano a Santiago.", "am", 357010, ""],
 ["peteroa", "Planchón-Peteroa", "Chile / Argentina", -35.24, -70.57, 3977, "2025", "a", "Estratovolcán", "Un volcán con doble pasaporte.", "am", 357040, ""],
-["quizapu", "Cerro Azul (Quizapu)", "Chile", -35.65, -70.76, 3788, "1967", "h", "Estratovolcán", "Su cráter Quizapu tuvo en 1932 una de las mayores erupciones del siglo XX en Sudamérica.", "am", 357060, ""],
+["quizapu", "Cerro Azul (Quizapu)", "Chile", -35.65, -70.76, 3788, "1967", "d", "Estratovolcán", "Su cráter Quizapu tuvo en 1932 una de las mayores erupciones del siglo XX en Sudamérica.", "am", 357060, ""],
 ["chillan", "Nevados de Chillán", "Chile", -36.86, -71.38, 3180, "2026", "a", "Estratovolcán", "Famoso por sus termas y su centro de esquí. La lava es extra.", "am", 357070, ""],
 ["copahue", "Copahue", "Chile / Argentina", -37.86, -71.17, 2953, "2024", "a", "Estratovolcán", "A sus pies hay un pueblo termal con baños de lodo.", "am", 357090, ""],
-["llaima", "Llaima", "Chile", -38.69, -71.73, 3125, "2009", "h", "Estratovolcán", "Uno de los más activos de Chile, rodeado de araucarias.", "am", 357110, ""],
+["llaima", "Llaima", "Chile", -38.69, -71.73, 3125, "2009", "a", "Estratovolcán", "Uno de los más activos de Chile, rodeado de araucarias.", "am", 357110, ""],
 ["villarrica", "Villarrica", "Chile", -39.42, -71.93, 2847, "2026", "a", "Estratovolcán", "Tiene lago de lava en el cráter y la gente lo sube con crampones.", "am", 357120, ""],
 ["lanin", "Lanín", "Argentina / Chile", -39.64, -71.5, 3776, "560 d.C.", "d", "Estratovolcán", "Símbolo de Neuquén, con su cono nevado casi perfecto.", "am", 357122, ""],
-["cordon-caulle", "Puyehue-Cordón Caulle", "Chile", -40.59, -72.12, 2236, "2012", "h", "Estratovolcán", "En 2011 su ceniza dio la vuelta al mundo y cerró aeropuertos en Australia.", "am", 357150, ""],
-["osorno", "Osorno", "Chile", -41.1, -72.49, 2659, "1869", "h", "Estratovolcán", "Le dicen el Fuji de los Andes.", "am", 358010, ""],
-["calbuco", "Calbuco", "Chile", -41.33, -72.61, 1974, "2015", "h", "Estratovolcán", "En abril de 2015 despertó casi sin aviso, tras décadas de calma.", "am", 358020, ""],
-["chaiten", "Chaitén", "Chile", -42.83, -72.65, 1122, "2011", "h", "Caldera", "En 2008 sorprendió a todos: nadie sabía que estaba vivo.", "am", 358041, ""],
-["hudson", "Hudson", "Chile", -45.9, -72.97, 1905, "2011", "h", "Estratovolcán", "Su erupción de 1991 llenó de ceniza la Patagonia argentina.", "am", 358057, ""],
-["lautaro", "Lautaro", "Chile", -49.02, -73.55, 3542, "1979", "h", "Estratovolcán", "Vive enterrado bajo el Campo de Hielo Patagónico Sur.", "am", 358060, ""],
-["burney", "Monte Burney", "Chile", -52.33, -73.4, 1758, "1910", "h", "Estratovolcán", "Uno de los volcanes más australes del continente.", "am", 358070, ""],
+["cordon-caulle", "Puyehue-Cordón Caulle", "Chile", -40.59, -72.12, 2236, "2012", "a", "Estratovolcán", "En 2011 su ceniza dio la vuelta al mundo y cerró aeropuertos en Australia.", "am", 357150, ""],
+["osorno", "Osorno", "Chile", -41.1, -72.49, 2659, "1869", "d", "Estratovolcán", "Le dicen el Fuji de los Andes.", "am", 358010, ""],
+["calbuco", "Calbuco", "Chile", -41.33, -72.61, 1974, "2015", "a", "Estratovolcán", "En abril de 2015 despertó casi sin aviso, tras décadas de calma.", "am", 358020, ""],
+["chaiten", "Chaitén", "Chile", -42.83, -72.65, 1122, "2011", "a", "Caldera", "En 2008 sorprendió a todos: nadie sabía que estaba vivo.", "am", 358041, ""],
+["hudson", "Hudson", "Chile", -45.9, -72.97, 1905, "2011", "a", "Estratovolcán", "Su erupción de 1991 llenó de ceniza la Patagonia argentina.", "am", 358057, ""],
+["lautaro", "Lautaro", "Chile", -49.02, -73.55, 3542, "1979", "a", "Estratovolcán", "Vive enterrado bajo el Campo de Hielo Patagónico Sur.", "am", 358060, ""],
+["burney", "Monte Burney", "Chile", -52.33, -73.4, 1758, "1910", "d", "Estratovolcán", "Uno de los volcanes más australes del continente.", "am", 358070, ""],
 ["michael", "Monte Michael (Isla Saunders)", "Islas Sándwich del Sur", -57.78, -26.45, 843, "2026", "a", "Estratovolcán", "Tiene un lago de lava permanente y casi nadie para verlo.", "am", 390090, ""]
 ];
 // [id, nombre, país, lat, lon, altitud, última erupción, cat, tipo, dato, región]
 const WORLD = [
-["hekla", "Hekla", "Islandia", 63.98, -19.7, 1490, "2000", "h", "Estratovolcán", "En la Edad Media lo llamaban la puerta del infierno.", "eu", 372070, ""],
-["eyjafjallajokull", "Eyjafjallajökull", "Islandia", 63.63, -19.62, 1651, "2010", "h", "Estratovolcán", "En 2010 obligó a cancelar unos 100,000 vuelos en Europa. Y casi nadie supo pronunciarlo.", "eu", 372020, ""],
-["katla", "Katla", "Islandia", 63.63, -19.05, 1490, "1918", "h", "Fisura", "Duerme bajo el glaciar Mýrdalsjökull y los islandeses lo vigilan de cerca.", "eu", 372030, ""],
-["grimsvotn", "Grímsvötn", "Islandia", 64.42, -17.33, 1719, "2011", "h", "Caldera", "El volcán más activo de Islandia, escondido bajo el glaciar Vatnajökull.", "eu", 373010, ""],
-["laki", "Laki (sistema Grímsvötn)", "Islandia", 64.07, -18.23, null, "1784", "h", "Fisura", "Su erupción de 1783 llenó Europa de gases tóxicos y provocó hambrunas.", "eu", 373010, "Fecha: GVP (sistema Grímsvötn) y Wikipedia"],
-["askja", "Askja", "Islandia", 65.03, -16.75, 1080, "1961", "h", "Estratovolcán", "Los astronautas del Apolo entrenaron aquí antes de ir a la Luna.", "eu", 373060, ""],
+["hekla", "Hekla", "Islandia", 63.98, -19.7, 1490, "2000", "a", "Estratovolcán", "En la Edad Media lo llamaban la puerta del infierno.", "eu", 372070, ""],
+["eyjafjallajokull", "Eyjafjallajökull", "Islandia", 63.63, -19.62, 1651, "2010", "a", "Estratovolcán", "En 2010 obligó a cancelar unos 100,000 vuelos en Europa. Y casi nadie supo pronunciarlo.", "eu", 372020, ""],
+["katla", "Katla", "Islandia", 63.63, -19.05, 1490, "1918", "d", "Fisura", "Duerme bajo el glaciar Mýrdalsjökull y los islandeses lo vigilan de cerca.", "eu", 372030, ""],
+["grimsvotn", "Grímsvötn", "Islandia", 64.42, -17.33, 1719, "2011", "a", "Caldera", "El volcán más activo de Islandia, escondido bajo el glaciar Vatnajökull.", "eu", 373010, ""],
+["laki", "Laki (sistema Grímsvötn)", "Islandia", 64.07, -18.23, null, "1784", "d", "Fisura", "Su erupción de 1783 llenó Europa de gases tóxicos y provocó hambrunas.", "eu", 373010, "Fecha: GVP (sistema Grímsvötn) y Wikipedia"],
+["askja", "Askja", "Islandia", 65.03, -16.75, 1080, "1961", "d", "Estratovolcán", "Los astronautas del Apolo entrenaron aquí antes de ir a la Luna.", "eu", 373060, ""],
 ["sundhnukur", "Reykjanes (Sundhnúkur)", "Islandia", 63.88, -22.42, 140, "2025", "a", "Fila de cráteres", "Desde 2023 abre grietas de lava junto al pueblo de Grindavík, que tuvo que evacuarse.", "eu", 371020, ""],
-["beerenberg", "Beerenberg (Jan Mayen)", "Noruega (Jan Mayen)", 71.08, -8.16, 2197, "1985", "h", "Estratovolcán", "Uno de los volcanes activos más al norte del planeta.", "eu", 376010, ""],
+["beerenberg", "Beerenberg (Jan Mayen)", "Noruega (Jan Mayen)", 71.08, -8.16, 2197, "1985", "a", "Estratovolcán", "Uno de los volcanes activos más al norte del planeta.", "eu", 376010, ""],
 ["etna", "Etna", "Italia (Sicilia)", 37.75, 15.0, 3357, "2026", "a", "Estratovolcán", "El volcán más activo de Europa. Los sicilianos le dicen Mongibello.", "eu", 211060, ""],
-["vesubio", "Vesubio", "Italia", 40.82, 14.43, 1281, "1944", "h", "Estratovolcán", "Sepultó Pompeya en el año 79. Hoy viven unos 3 millones de personas a su alrededor.", "eu", 211020, ""],
-["campi-flegrei", "Campos Flégreos", "Italia", 40.83, 14.14, 458, "1538", "h", "Caldera", "El suelo de Pozzuoli sube y baja como si el volcán respirara.", "eu", 211010, ""],
+["vesubio", "Vesubio", "Italia", 40.82, 14.43, 1281, "1944", "d", "Estratovolcán", "Sepultó Pompeya en el año 79. Hoy viven unos 3 millones de personas a su alrededor.", "eu", 211020, ""],
+["campi-flegrei", "Campos Flégreos", "Italia", 40.83, 14.14, 458, "1538", "d", "Caldera", "El suelo de Pozzuoli sube y baja como si el volcán respirara.", "eu", 211010, ""],
 ["stromboli", "Stromboli", "Italia", 38.79, 15.21, 924, "2026", "a", "Estratovolcán", "Lleva al menos 2,000 años en erupción casi continua: el Faro del Mediterráneo.", "eu", 211040, ""],
-["vulcano", "Vulcano", "Italia", 38.4, 14.96, 500, "1890", "h", "Estratovolcán", "Le dio nombre a todos los volcanes del mundo, por el dios romano del fuego.", "eu", 211050, ""],
-["santorini", "Santorini", "Grecia", 36.4, 25.4, 367, "1950", "h", "Volcán en escudo", "Su erupción de hace 3,600 años quizá inspiró el mito de la Atlántida.", "eu", 212040, ""],
-["teide", "Teide (Tenerife)", "España (Tenerife)", 28.27, -16.64, 3715, "1909", "h", "Estratovolcán", "El punto más alto de España está en las Canarias.", "eu", 383030, ""],
+["vulcano", "Vulcano", "Italia", 38.4, 14.96, 500, "1890", "d", "Estratovolcán", "Le dio nombre a todos los volcanes del mundo, por el dios romano del fuego.", "eu", 211050, ""],
+["santorini", "Santorini", "Grecia", 36.4, 25.4, 367, "1950", "d", "Volcán en escudo", "Su erupción de hace 3,600 años quizá inspiró el mito de la Atlántida.", "eu", 212040, ""],
+["teide", "Teide (Tenerife)", "España (Tenerife)", 28.27, -16.64, 3715, "1909", "d", "Estratovolcán", "El punto más alto de España está en las Canarias.", "eu", 383030, ""],
 ["tajogaite", "La Palma (Tajogaite)", "España (La Palma)", 28.61, -17.87, 2426, "2021", "a", "Estratovolcán", "En 2021 su lava sepultó barrios enteros de La Palma durante casi tres meses.", "eu", 383010, ""],
-["pico", "Montaña del Pico", "Portugal (Azores)", 38.47, -28.4, 2351, "1720", "h", "Estratovolcán", "El punto más alto de Portugal, en mitad del Atlántico.", "eu", 382020, ""],
-["fogo", "Fogo", "Cabo Verde", 14.95, -24.35, 2829, "2015", "h", "Estratovolcán", "Dentro de su caldera vive gente que hace vino con uvas volcánicas.", "af", 384010, ""],
-["tristan", "Tristán de Acuña", "Reino Unido (Tristán de Acuña)", -37.09, -12.28, 2060, "1962", "h", "Volcán en escudo", "La isla habitada más remota del mundo. En 1961 la evacuaron entera.", "eu", 386010, ""],
+["pico", "Montaña del Pico", "Portugal (Azores)", 38.47, -28.4, 2351, "1720", "d", "Estratovolcán", "El punto más alto de Portugal, en mitad del Atlántico.", "eu", 382020, ""],
+["fogo", "Fogo", "Cabo Verde", 14.95, -24.35, 2829, "2015", "a", "Estratovolcán", "Dentro de su caldera vive gente que hace vino con uvas volcánicas.", "af", 384010, ""],
+["tristan", "Tristán de Acuña", "Reino Unido (Tristán de Acuña)", -37.09, -12.28, 2060, "1962", "d", "Volcán en escudo", "La isla habitada más remota del mundo. En 1961 la evacuaron entera.", "eu", 386010, ""],
 ["chaine-puys", "Cadena de los Puys", "Francia", 45.78, 2.96, 1464, "4,040 a.C.", "d", "Domo de lava", "Unos 80 volcanes dormidos en fila, en pleno centro de Francia.", "eu", 210020, ""],
 ["laacher-see", "Laacher See (Eifel oriental)", "Alemania", 50.41, 7.27, 588, "Pleistoceno", "d", "Maar", "Hoy es un lago tranquilo; hace 13,000 años fue una erupción enorme.", "eu", 210812, ""],
 ["elbrus", "Elbrús", "Rusia", 43.35, 42.44, 5642, "50 d.C.", "d", "Estratovolcán", "La montaña más alta de Europa es un volcán dormido.", "eu", 214010, ""],
-["ararat", "Ararat", "Turquía", 39.7, 44.3, 5165, "1840", "h", "Estratovolcán", "Según la tradición, aquí encalló el arca de Noé.", "af", 213040, ""],
+["ararat", "Ararat", "Turquía", 39.7, 44.3, 5165, "1840", "d", "Estratovolcán", "Según la tradición, aquí encalló el arca de Noé.", "af", 213040, ""],
 ["damavand", "Damavand", "Irán", 35.95, 52.11, 5670, "5,350 a.C.", "d", "Estratovolcán", "El volcán más alto de Asia aparece en el Shahnameh, la gran épica persa.", "af", 232010, ""],
 ["kilimanjaro", "Kilimanjaro", "Tanzania", -3.07, 37.35, 5881, "Pleistoceno", "d", "Estratovolcán", "El techo de África. Sus glaciares se encogen año con año.", "af", 222150, ""],
 ["lengai", "Ol Doinyo Lengai", "Tanzania", -2.76, 35.91, 2962, "2026", "a", "Estratovolcán", "Escupe la lava más fría y rara del mundo: sale negra y se vuelve blanca.", "af", 222120, ""],
-["meru", "Monte Meru", "Tanzania", -3.25, 36.75, 4550, "1910", "h", "Estratovolcán", "El hermano menor del Kilimanjaro, a unos 70 km.", "af", 222160, ""],
+["meru", "Monte Meru", "Tanzania", -3.25, 36.75, 4550, "1910", "d", "Estratovolcán", "El hermano menor del Kilimanjaro, a unos 70 km.", "af", 222160, ""],
 ["nyiragongo", "Nyiragongo", "R. D. del Congo", -1.52, 29.25, 3470, "2026", "a", "Estratovolcán", "Tiene uno de los lagos de lava más grandes del mundo y una lava rapidísima.", "af", 223030, ""],
 ["nyamulagira", "Nyamulagira", "R. D. del Congo", -1.41, 29.2, 3058, "2026", "a", "Volcán en escudo", "El volcán más activo de África.", "af", 223020, ""],
 ["erta-ale", "Erta Ale", "Etiopía", 13.6, 40.67, 585, "2025", "a", "Volcán en escudo", "La Montaña Humeante tuvo un lago de lava durante décadas en el desierto de Danakil.", "af", 221080, ""],
-["dallol", "Dallol", "Etiopía", 14.24, 40.3, -48, "2011", "h", "Cráter de explosión", "Pozas ácidas amarillas y verdes bajo el nivel del mar: parece otro planeta.", "af", 221041, ""],
-["nabro", "Nabro", "Eritrea", 13.37, 41.7, 2218, "2012", "h", "Estratovolcán", "Nadie lo tenía en el radar hasta que hizo erupción en 2011.", "af", 221101, ""],
-["cameroon", "Monte Camerún", "Camerún", 4.2, 9.17, 4095, "2000", "h", "Estratovolcán", "El punto más alto de África occidental. Le dicen el Carro de los Dioses.", "af", 224010, ""],
+["dallol", "Dallol", "Etiopía", 14.24, 40.3, -48, "2011", "a", "Cráter de explosión", "Pozas ácidas amarillas y verdes bajo el nivel del mar: parece otro planeta.", "af", 221041, ""],
+["nabro", "Nabro", "Eritrea", 13.37, 41.7, 2218, "2012", "a", "Estratovolcán", "Nadie lo tenía en el radar hasta que hizo erupción en 2011.", "af", 221101, ""],
+["cameroon", "Monte Camerún", "Camerún", 4.2, 9.17, 4095, "2000", "a", "Estratovolcán", "El punto más alto de África occidental. Le dicen el Carro de los Dioses.", "af", 224010, ""],
 ["emi-koussi", "Emi Koussi", "Chad", 19.79, 18.55, 3415, "Sin fecha registrada", "d", "Escudo piroclástico", "El punto más alto del Sahara.", "af", 225021, ""],
 ["fournaise", "Piton de la Fournaise", "Francia (Reunión)", -21.24, 55.71, 2632, "2026", "a", "Volcán en escudo", "Hace erupción casi cada año y los isleños van a verlo como paseo.", "af", 233020, ""],
-["karthala", "Karthala", "Comoras", -11.75, 43.38, 2350, "2007", "h", "Volcán en escudo", "Tiene una de las calderas más grandes de un volcán activo.", "af", 233010, ""],
-["jabal-tair", "Jabal al-Tair", "Yemen", 15.55, 41.83, 244, "2008", "h", "Estratovolcán", "Una isla volcánica solitaria en medio del mar Rojo.", "af", 221010, ""],
+["karthala", "Karthala", "Comoras", -11.75, 43.38, 2350, "2007", "a", "Volcán en escudo", "Tiene una de las calderas más grandes de un volcán activo.", "af", 233010, ""],
+["jabal-tair", "Jabal al-Tair", "Yemen", 15.55, 41.83, 244, "2008", "a", "Estratovolcán", "Una isla volcánica solitaria en medio del mar Rojo.", "af", 221010, ""],
 ["harrat-rahat", "Harrat Rahat", "Arabia Saudita", 23.08, 39.78, 1744, "1256", "d", "Campo volcánico", "Su lava de 1256 se detuvo a pocos kilómetros de Medina.", "af", 231070, ""],
 ["big-ben", "Big Ben (Isla Heard)", "Australia", -53.11, 73.51, 2745, "2026", "a", "Estratovolcán", "El volcán activo más alto de Australia, en una isla casi sin visitantes.", "oc", 234010, ""],
 ["klyuchevskoy", "Kliuchevskói", "Rusia (Kamchatka)", 56.06, 160.64, 4754, "2026", "a", "Estratovolcán", "El volcán activo más alto de Eurasia.", "as", 300260, ""],
 ["shiveluch", "Shiveluch", "Rusia (Kamchatka)", 56.65, 161.36, 3283, "2026", "a", "Estratovolcán", "Uno de los volcanes más explosivos de Kamchatka.", "as", 300270, ""],
 ["bezymianny", "Bezymianny", "Rusia (Kamchatka)", 55.97, 160.59, 2882, "2026", "a", "Estratovolcán", "Su nombre significa sin nombre. Lo creían apagado hasta 1955.", "as", 300250, ""],
-["tolbachik", "Tolbachik", "Rusia (Kamchatka)", 55.83, 160.33, 3611, "2013", "h", "Volcán en escudo", "Su erupción de 2012 dejó ríos de lava que se podían ver muy de cerca.", "as", 300240, ""],
-["avachinsky", "Avachinski", "Rusia (Kamchatka)", 53.26, 158.83, 2717, "2001", "h", "Estratovolcán", "Se ve desde Petropávlovsk y los locales lo suben en un fin de semana.", "as", 300100, ""],
+["tolbachik", "Tolbachik", "Rusia (Kamchatka)", 55.83, 160.33, 3611, "2013", "a", "Volcán en escudo", "Su erupción de 2012 dejó ríos de lava que se podían ver muy de cerca.", "as", 300240, ""],
+["avachinsky", "Avachinski", "Rusia (Kamchatka)", 53.26, 158.83, 2717, "2001", "a", "Estratovolcán", "Se ve desde Petropávlovsk y los locales lo suben en un fin de semana.", "as", 300100, ""],
 ["karymsky", "Karymski", "Rusia (Kamchatka)", 54.05, 159.44, 1513, "2025", "a", "Estratovolcán", "Uno de los volcanes más inquietos de Kamchatka.", "as", 300130, ""],
 ["ebeko", "Ebeko", "Rusia (Kuriles)", 50.69, 156.01, 1103, "2024", "a", "Estratovolcán", "Le echa ceniza seguido al pueblito de Severo-Kurilsk.", "as", 290380, ""],
 ["sarychev", "Sarychev", "Rusia (Kuriles)", 48.09, 153.2, 1496, "2021", "a", "Estratovolcán", "Los astronautas de la Estación Espacial fotografiaron su erupción de 2009 desde arriba.", "as", 290240, ""],
-["raikoke", "Raikoke", "Rusia (Kuriles)", 48.29, 153.25, 551, "2019", "h", "Estratovolcán", "Una islita que despertó en 2019 tras casi un siglo de silencio.", "as", 290250, ""],
-["usu", "Usu (caldera Toya)", "Japón (Hokkaido)", 42.54, 140.84, 733, "2001", "h", "Estratovolcán", "En 1943 le nació al lado un volcán nuevo, y el cartero del pueblo lo midió día a día.", "as", 285030, ""],
-["asama", "Asama", "Japón", 36.41, 138.52, 2568, "2019", "h", "Complejo volcánico", "De los más activos de la isla principal de Japón.", "as", 283110, ""],
-["fuji", "Monte Fuji", "Japón", 35.36, 138.73, 3776, "1708", "h", "Estratovolcán", "El volcán más famoso del mundo lleva 300 años sin hacer erupción.", "as", 283030, ""],
-["ontake", "Ontake", "Japón", 35.89, 137.48, 3067, "2014", "h", "Complejo volcánico", "Montaña sagrada; su erupción de 2014 sorprendió a cientos de excursionistas.", "as", 283040, ""],
+["raikoke", "Raikoke", "Rusia (Kuriles)", 48.29, 153.25, 551, "2019", "a", "Estratovolcán", "Una islita que despertó en 2019 tras casi un siglo de silencio.", "as", 290250, ""],
+["usu", "Usu (caldera Toya)", "Japón (Hokkaido)", 42.54, 140.84, 733, "2001", "a", "Estratovolcán", "En 1943 le nació al lado un volcán nuevo, y el cartero del pueblo lo midió día a día.", "as", 285030, ""],
+["asama", "Asama", "Japón", 36.41, 138.52, 2568, "2019", "a", "Complejo volcánico", "De los más activos de la isla principal de Japón.", "as", 283110, ""],
+["fuji", "Monte Fuji", "Japón", 35.36, 138.73, 3776, "1708", "d", "Estratovolcán", "El volcán más famoso del mundo lleva 300 años sin hacer erupción.", "as", 283030, ""],
+["ontake", "Ontake", "Japón", 35.89, 137.48, 3067, "2014", "a", "Complejo volcánico", "Montaña sagrada; su erupción de 2014 sorprendió a cientos de excursionistas.", "as", 283040, ""],
 ["nishinoshima", "Nishinoshima", "Japón", 27.25, 140.87, 160, "2023", "a", "Caldera", "Una isla que no ha parado de crecer desde 2013.", "as", 284096, ""],
 ["aso", "Aso", "Japón (Kyushu)", 32.88, 131.1, 1592, "2021", "a", "Caldera", "Dentro de su caldera viven unas 50,000 personas.", "as", 282110, ""],
-["unzen", "Unzen", "Japón (Kyushu)", 32.76, 130.3, 1483, "1996", "h", "Complejo volcánico", "En 1991 su flujo piroclástico mató a los vulcanólogos Katia y Maurice Krafft.", "as", 282100, ""],
+["unzen", "Unzen", "Japón (Kyushu)", 32.76, 130.3, 1483, "1996", "a", "Complejo volcánico", "En 1991 su flujo piroclástico mató a los vulcanólogos Katia y Maurice Krafft.", "as", 282100, ""],
 ["sakurajima", "Sakurajima (caldera Aira)", "Japón (Kyushu)", 31.59, 130.66, 1117, "2026", "a", "Caldera", "En Kagoshima hay bolsas especiales para recoger su ceniza.", "as", 282080, ""],
-["paektu", "Paektu", "Corea del Norte / China", 41.99, 128.08, 2744, "1903", "h", "Estratovolcán", "Su erupción del año 946 fue de las más grandes de la historia.", "as", 305060, ""],
+["paektu", "Paektu", "Corea del Norte / China", 41.99, 128.08, 2744, "1903", "d", "Estratovolcán", "Su erupción del año 946 fue de las más grandes de la historia.", "as", 305060, ""],
 ["hallasan", "Hallasan", "Corea del Sur", 33.36, 126.53, 1919, "1007", "d", "Volcán en escudo", "La montaña más alta de Corea del Sur, en la isla de Jeju.", "as", 306040, ""],
 ["pinatubo", "Pinatubo", "Filipinas", 15.13, 120.35, 1486, "2021", "a", "Estratovolcán", "Su erupción de 1991 enfrió el planeta medio grado durante un año.", "as", 273083, ""],
 ["taal", "Taal", "Filipinas", 14.0, 120.99, 311, "2026", "a", "Caldera", "Un volcán en una isla en un lago en una isla.", "as", 273070, ""],
@@ -415,38 +423,38 @@ const WORLD = [
 ["marapi", "Marapi", "Indonesia (Sumatra)", -0.38, 100.47, 2885, "2026", "a", "Complejo volcánico", "En 2023 sorprendió a un grupo de excursionistas cerca de la cima.", "as", 261140, ""],
 ["krakatau", "Anak Krakatau", "Indonesia", -6.1, 105.42, 285, "2026", "a", "Caldera", "Su abuelo explotó en 1883 con el sonido más fuerte registrado. El nieto salió del mar en 1927.", "as", 262000, ""],
 ["merapi", "Merapi", "Indonesia (Java)", -7.54, 110.45, 2910, "2026", "a", "Estratovolcán", "Su nombre significa montaña de fuego. Muy activo y muy habitado.", "as", 263250, ""],
-["kelud", "Kelud", "Indonesia (Java)", -7.93, 112.31, 1730, "2014", "h", "Estratovolcán", "Tiene historial de lahares mortales; le cavaron túneles para drenar su lago.", "as", 263280, ""],
+["kelud", "Kelud", "Indonesia (Java)", -7.93, 112.31, 1730, "2014", "a", "Estratovolcán", "Tiene historial de lahares mortales; le cavaron túneles para drenar su lago.", "as", 263280, ""],
 ["bromo", "Bromo (caldera Tengger)", "Indonesia (Java)", -7.94, 112.95, 2329, "2023", "a", "Estratovolcán", "Cada año le lanzan ofrendas al cráter en la ceremonia Yadnya Kasada.", "as", 263310, ""],
 ["semeru", "Semeru", "Indonesia (Java)", -8.11, 112.92, 3657, "2026", "a", "Estratovolcán", "El punto más alto de Java, con explosiones cada pocos minutos.", "as", 263300, ""],
-["ijen", "Ijen", "Indonesia (Java)", -8.06, 114.24, 2769, "1999", "h", "Estratovolcán", "De noche arde con fuego azul por el azufre.", "as", 263350, ""],
+["ijen", "Ijen", "Indonesia (Java)", -8.06, 114.24, 2769, "1999", "a", "Estratovolcán", "De noche arde con fuego azul por el azufre.", "as", 263350, ""],
 ["agung", "Agung", "Indonesia (Bali)", -8.34, 115.51, 2997, "2022", "a", "Estratovolcán", "La montaña sagrada de Bali.", "as", 264020, ""],
-["rinjani", "Rinjani", "Indonesia (Lombok)", -8.42, 116.47, 3726, "2016", "h", "Estratovolcán", "Dentro de su caldera hay un lago y un volcán bebé llamado Barujari.", "as", 264030, ""],
-["tambora", "Tambora", "Indonesia (Sumbawa)", -8.25, 118.0, 2850, "1967", "h", "Estratovolcán", "Su erupción de 1815 causó el año sin verano. Frankenstein se escribió en ese frío.", "as", 264040, ""],
+["rinjani", "Rinjani", "Indonesia (Lombok)", -8.42, 116.47, 3726, "2016", "a", "Estratovolcán", "Dentro de su caldera hay un lago y un volcán bebé llamado Barujari.", "as", 264030, ""],
+["tambora", "Tambora", "Indonesia (Sumbawa)", -8.25, 118.0, 2850, "1967", "d", "Estratovolcán", "Su erupción de 1815 causó el año sin verano. Frankenstein se escribió en ese frío.", "as", 264040, ""],
 ["lewotobi", "Lewotobi Laki-laki", "Indonesia (Flores)", -8.54, 122.78, 1703, "2026", "a", "Estratovolcán", "Tiene volcán pareja: Lewotobi Perempuan, el volcán mujer.", "as", 264180, ""],
 ["ruang", "Ruang", "Indonesia", 2.3, 125.37, 703, "2024", "a", "Estratovolcán", "En 2024 obligó a evacuar la isla entera.", "as", 267010, ""],
 ["dukono", "Dukono", "Indonesia (Halmahera)", 1.69, 127.89, 1273, "2026", "a", "Complejo volcánico", "Lleva en erupción casi sin pausa desde 1933.", "as", 268010, ""],
 ["manam", "Manam", "Papúa Nueva Guinea", -4.08, 145.04, 1807, "2026", "a", "Estratovolcán", "La isla entera es el volcán; en 2004 evacuaron a todos sus habitantes.", "oc", 251020, ""],
-["rabaul", "Rabaul (Tavurvur)", "Papúa Nueva Guinea", -4.27, 152.2, 688, "2014", "h", "Caldera", "En 1994 sepultó en ceniza la ciudad de Rabaul.", "oc", 252140, ""],
+["rabaul", "Rabaul (Tavurvur)", "Papúa Nueva Guinea", -4.27, 152.2, 688, "2014", "a", "Caldera", "En 1994 sepultó en ceniza la ciudad de Rabaul.", "oc", 252140, ""],
 ["ulawun", "Ulawun", "Papúa Nueva Guinea", -5.05, 151.33, 2334, "2026", "a", "Estratovolcán", "Está en la lista de la ONU de volcanes de alto riesgo.", "oc", 252120, ""],
 ["bagana", "Bagana", "Papúa Nueva Guinea (Bougainville)", -6.14, 155.2, 1855, "2026", "a", "Cono de lava", "Un cono de lava que crece despacito en la selva de Bougainville.", "oc", 255020, ""],
 ["yasur", "Yasur", "Vanuatu", -19.53, 169.44, 361, "2026", "a", "Estratovolcán", "Uno de los volcanes activos más fáciles de visitar: llegas casi en camioneta.", "oc", 257100, ""],
 ["ambrym", "Ambrym", "Vanuatu", -16.25, 168.12, 1334, "2026", "a", "Escudo piroclástico", "Tuvo varios lagos de lava a la vez hasta 2018.", "oc", 257040, ""],
 ["hunga-tonga", "Hunga Tonga-Hunga Haʻapai", "Tonga", -20.55, -175.39, 114, "2022", "a", "Caldera", "En 2022 lanzó la columna eruptiva más alta jamás medida: unos 57 km.", "oc", 243040, ""],
 ["whakaari", "Whakaari (White Island)", "Nueva Zelanda", -37.52, 177.18, 294, "2026", "a", "Estratovolcán", "Su erupción de 2019 sorprendió a un grupo de turistas dentro del cráter.", "oc", 241040, ""],
-["ruapehu", "Ruapehu", "Nueva Zelanda", -39.28, 175.57, 2797, "2007", "h", "Estratovolcán", "Tiene pistas de esquí y un lago de cráter caliente.", "oc", 241100, ""],
-["ngauruhoe", "Tongariro (Ngauruhoe)", "Nueva Zelanda", -39.16, 175.63, 1978, "2012", "h", "Estratovolcán", "Su cono más joven, el Ngauruhoe, hizo de Monte del Destino en El Señor de los Anillos.", "oc", 241080, ""],
-["taranaki", "Taranaki", "Nueva Zelanda", -39.3, 174.06, 2518, "1800", "h", "Estratovolcán", "En 2025 la ley neozelandesa lo reconoció como persona.", "oc", 241030, ""],
+["ruapehu", "Ruapehu", "Nueva Zelanda", -39.28, 175.57, 2797, "2007", "a", "Estratovolcán", "Tiene pistas de esquí y un lago de cráter caliente.", "oc", 241100, ""],
+["ngauruhoe", "Tongariro (Ngauruhoe)", "Nueva Zelanda", -39.16, 175.63, 1978, "2012", "a", "Estratovolcán", "Su cono más joven, el Ngauruhoe, hizo de Monte del Destino en El Señor de los Anillos.", "oc", 241080, ""],
+["taranaki", "Taranaki", "Nueva Zelanda", -39.3, 174.06, 2518, "1800", "d", "Estratovolcán", "En 2025 la ley neozelandesa lo reconoció como persona.", "oc", 241030, ""],
 ["taupo", "Taupō", "Nueva Zelanda", -38.82, 176.0, 760, "260 d.C.", "d", "Caldera", "Hoy es el lago más grande de Nueva Zelanda; su erupción de hacia el año 260 fue de las más violentas de los últimos 5,000 años.", "oc", 241070, ""],
 ["kilauea", "Kīlauea", "EE. UU. (Hawái)", 19.42, -155.29, 1222, "2026", "a", "Volcán en escudo", "Hogar de Pele, la diosa del fuego. Lleva décadas sacando lava.", "oc", 332010, ""],
 ["mauna-loa", "Mauna Loa", "EE. UU. (Hawái)", 19.48, -155.61, 4170, "2022", "a", "Volcán en escudo", "El volcán más grande del Holoceno: se eleva casi 9 km desde el fondo del océano.", "oc", 332020, ""],
 ["mauna-kea", "Mauna Kea", "EE. UU. (Hawái)", 19.82, -155.47, 4205, "2,460 a.C.", "d", "Volcán en escudo", "Medido desde el fondo del mar, es más alto que el Everest.", "oc", 332030, ""],
-["anatahan", "Anatahan", "Islas Marianas del Norte", 16.35, 145.67, 790, "2008", "h", "Estratovolcán", "Su erupción de 2003 fue la primera registrada en la isla.", "oc", 284200, ""],
+["anatahan", "Anatahan", "Islas Marianas del Norte", 16.35, 145.67, 790, "2008", "a", "Estratovolcán", "Su erupción de 2003 fue la primera registrada en la isla.", "oc", 284200, ""],
 ["erebus", "Erebus", "Antártida", -77.53, 167.15, 3794, "2026", "a", "Estratovolcán", "El volcán activo más austral del planeta, con un lago de lava permanente. Hasta escupe polvo de oro.", "an", 390020, ""],
-["deception", "Isla Decepción", "Antártida", -62.97, -60.65, 602, "1970", "h", "Caldera", "Los barcos entran a su caldera inundada y hay playas de agua caliente.", "an", 390030, ""]
+["deception", "Isla Decepción", "Antártida", -62.97, -60.65, 602, "1970", "d", "Caldera", "Los barcos entran a su caldera inundada y hay playas de agua caliente.", "an", 390030, ""]
 ];
 
 const V = [...RAW,...WORLD].map(r=>({id:r[0],name:r[1],country:r[2],lat:r[3],lon:r[4],elev:r[5],last:r[6],cat:r[7],type:r[8],fact:r[9],region:r[10]||'am',gvp:r[11],alt:r[12]||''}));
-const CAT = {a:{label:"Activo",short:"ACTIVO"},h:{label:"Histórico",short:"HISTÓRICO"},d:{label:"Dormido",short:"DORMIDO"}};
+const CAT = {a:{label:"Activo",short:"ACTIVO"},d:{label:"Dormido",short:"DORMIDO"}};
 
 // ---------- Proyección Mercator del mapa base ----------
 const LON0=-180, LON1=180, LATN=80, LATS=-79, RES=0.15;
@@ -718,8 +726,15 @@ function clampCam(){cam.z=Math.max(zmin(),Math.min(ZMAX,cam.z));cam.x=wrapX(cam.
 const toScreen=(x,y)=>[wrapD(x-cam.x)*cam.z+vw/2,(y-cam.y)*cam.z+vh/2];
 const toMap=(sx,sy)=>[(sx-vw/2)/cam.z+cam.x,(sy-vh/2)/cam.z+cam.y];
 
+// ---------- Favoritos (se guardan en este navegador) ----------
+const FKEY='volcanes-favoritos';
+let favs=new Set();try{favs=new Set(JSON.parse(localStorage.getItem(FKEY)||'[]'));}catch(_){}
+let onlyFavs=false;
+function saveFavs(){try{localStorage.setItem(FKEY,JSON.stringify([...favs]));}catch(_){}}
+const shown=v=>visible[v.cat]&&(!onlyFavs||favs.has(v.id));
+
 // ---------- Estado ----------
-const visible={a:true,h:true,d:true};
+const visible={a:true,d:true};
 let selected=null, hovered=null, fly=null, shake=0, particles=[];
 const U=()=>Math.max(2,Math.min(4,Math.round(1.6+cam.z*0.17)));
 
@@ -768,6 +783,10 @@ function drawVolcano(v,sx,sy,u,t){
       ctx.fillStyle='#070b22';ctx.fillRect(ax-4*u,ay-u,8*u,u*5);
       ctx.fillStyle='#ffd23f';ctx.fillRect(ax-3*u,ay,6*u,u);ctx.fillRect(ax-2*u,ay+u,4*u,u);ctx.fillRect(ax-u,ay+2*u,2*u,u);}
   }
+  if(favs.has(v.id)){const sx0=ox+w-2*u,sy0=oy-3*u;
+    const STAR=["..#..",".###.","#####",".###.","#.#.#"];
+    ctx.fillStyle='#070b22';STAR.forEach((r,ri)=>{for(let c=0;c<5;c++)if(r[c]==='#'){ctx.fillRect(sx0+(c-1)*u,sy0+ri*u,u*3,u);ctx.fillRect(sx0+c*u,sy0+(ri-1)*u,u,u*3);}});
+    ctx.fillStyle='#ffd23f';STAR.forEach((r,ri)=>{for(let c=0;c<5;c++)if(r[c]==='#')ctx.fillRect(sx0+c*u,sy0+ri*u,u,u);});}
   return {x:ox-u,y:oy-u,w:w+2*u,h:h+2*u};
 }
 
@@ -880,7 +899,7 @@ function frame(t){
   drawRing(t);
   // volcanes
   const u=U();hitBoxes=[];
-  const list=V.filter(v=>visible[v.cat]).sort((a,b)=>a.y-b.y);
+  const list=V.filter(shown).sort((a,b)=>a.y-b.y);
   for(const v of list){const Y=(v.y-cam.y)*cam.z+vh/2;if(Y<-80||Y>vh+60)continue;
     ctx.globalAlpha=ring&&!v.ring?0.3:1;for(const sx of screenXs(v.x,60)){const b=drawVolcano(v,sx,Y,u,t);hitBoxes.push({v,b,sx,sy:Y});}ctx.globalAlpha=1;}
   // nombres
@@ -1004,10 +1023,12 @@ function select(v,fromMap){
   <div><dt>TIPO</dt><dd>${esc(v.type)}</dd></div><div><dt>COORDENADAS</dt><dd>${fmtLat(v.lat)} ${fmtLon(v.lon)}</dd></div></dl>
   <p class="fact">${esc(v.fact)}</p>
   <p class="src">Fuente: <a href="https://volcano.si.edu/volcano.cfm?vn=${v.gvp}" target="_blank" rel="noopener">Global Volcanism Program #${v.gvp}</a>${v.alt?' · '+esc(v.alt):''}</p>
-  <div class="actions"><button class="pbtn lava" id="boom">¡ERUPCIÓN!</button><button class="pbtn ghost" id="zoomTo">ACERCAR</button></div>`;
+  <div class="actions"><button class="pbtn lava" id="boom">¡ERUPCIÓN!</button><button class="pbtn ghost" id="zoomTo">ACERCAR</button><button class="pbtn ghost fav" id="favBtn" aria-pressed="${favs.has(v.id)}">${favs.has(v.id)?'★ FAVORITO':'☆ FAVORITO'}</button></div>`;
   card.hidden=false;document.body.classList.add('has-card');
   document.getElementById('cx').onclick=closeCard;
   document.getElementById('boom').onclick=()=>erupt(v);
+  document.getElementById('favBtn').onclick=e=>{favs.has(v.id)?favs.delete(v.id):favs.add(v.id);saveFavs();const on=favs.has(v.id);
+    e.currentTarget.textContent=on?'★ FAVORITO':'☆ FAVORITO';e.currentTarget.setAttribute('aria-pressed',on);updateFavChip();renderList();};
   document.getElementById('zoomTo').onclick=()=>flyTo(v.x,v.y+offsetY(Math.max(cam.z*1.8,9)),Math.max(cam.z*1.8,9));
   if(!fromMap||cam.z<4.5){const z=Math.max(cam.z,6);flyTo(v.x,v.y+offsetY(z),z);}
   try{history.replaceState(null,'','#'+v.id);}catch(_){}
@@ -1017,11 +1038,18 @@ function closeCard(){selected=null;card.hidden=true;document.body.classList.remo
 
 // ---------- Leyenda, búsqueda y lista ----------
 const legend=document.getElementById('legend');
-for(const k of ['a','h','d']){const n=V.filter(v=>v.cat===k).length;
+for(const k of ['a','d']){const n=V.filter(v=>v.cat===k).length;
   const b=document.createElement('button');b.className='chip';b.setAttribute('aria-pressed','true');
   b.innerHTML=`<span class="dot ${k}"></span>${CAT[k].short}<span class="n">${n}</span>`;
   b.onclick=()=>{visible[k]=!visible[k];b.setAttribute('aria-pressed',visible[k]);if(selected&&!visible[selected.cat])closeCard();renderList();};
   legend.appendChild(b);}
+const favChip=document.createElement('button');favChip.className='chip favchip';favChip.setAttribute('aria-pressed','false');
+favChip.title='Muestra solo tus volcanes favoritos';
+function updateFavChip(){favChip.innerHTML=`<span class="star">★</span>FAVORITOS<span class="n">${favs.size}</span>`;
+  if(onlyFavs&&!favs.size){onlyFavs=false;favChip.setAttribute('aria-pressed','false');}}
+favChip.onclick=()=>{if(!favs.size){favChip.title='Abre la ficha de un volcán y toca ☆ FAVORITO para guardarlo';favChip.classList.add('nudge');setTimeout(()=>favChip.classList.remove('nudge'),600);return;}
+  onlyFavs=!onlyFavs;favChip.setAttribute('aria-pressed',onlyFavs);if(selected&&!shown(selected))closeCard();renderList();};
+updateFavChip();legend.appendChild(favChip);
 document.getElementById('subtitle').textContent=`${V.length} volcanes, de Islandia a la Antártida`;
 
 const norm=s=>s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
@@ -1042,17 +1070,17 @@ q.addEventListener('keydown',e=>{
   else if(e.key==='Escape'){q.value='';results.hidden=true;}
 });
 results.addEventListener('click',e=>{const b=e.target.closest('button');if(b)pick(rlist[+b.dataset.i]);});
-function pick(v){q.value='';results.hidden=true;q.blur();if(!visible[v.cat]){visible[v.cat]=true;legend.children[['a','h','d'].indexOf(v.cat)].setAttribute('aria-pressed','true');renderList();}select(v,false);}
+function pick(v){q.value='';results.hidden=true;q.blur();if(onlyFavs&&!favs.has(v.id)){onlyFavs=false;favChip.setAttribute('aria-pressed','false');}if(!visible[v.cat]){visible[v.cat]=true;legend.children[['a','d'].indexOf(v.cat)].setAttribute('aria-pressed','true');renderList();}select(v,false);}
 document.addEventListener('pointerdown',e=>{if(!e.target.closest('.search'))results.hidden=true;});
 
 const panel=document.getElementById('panel'), listBtn=document.getElementById('listBtn'), vlist=document.getElementById('vlist');
 function renderList(){
   const am=v=>v.region==='am';
-  const groups=[["NORTEAMÉRICA",v=>am(v)&&(v.lat>=21.5&&v.lon<-95||v.lat>=24)],["MÉXICO Y CENTROAMÉRICA",v=>am(v)&&v.lat>=7&&v.lon<-77],["CARIBE",v=>am(v)&&v.lon>-65&&v.lat>10],["SUDAMÉRICA",am],
+  const groups=[["★ MIS FAVORITOS",v=>favs.has(v.id)],["NORTEAMÉRICA",v=>am(v)&&(v.lat>=21.5&&v.lon<-95||v.lat>=24)],["MÉXICO Y CENTROAMÉRICA",v=>am(v)&&v.lat>=7&&v.lon<-77],["CARIBE",v=>am(v)&&v.lon>-65&&v.lat>10],["SUDAMÉRICA",am],
     ["EUROPA Y ATLÁNTICO",v=>v.region==='eu'],["ÁFRICA Y MEDIO ORIENTE",v=>v.region==='af'],["ASIA",v=>v.region==='as'],["OCEANÍA Y PACÍFICO",v=>v.region==='oc'],["ANTÁRTIDA",v=>v.region==='an']];
   const used=new Set();let html='';
   for(const [g,fn] of groups){const items=V.filter(v=>!used.has(v)&&fn(v)).sort((a,b)=>b.lat-a.lat);items.forEach(v=>used.add(v));
-    const vis=items.filter(v=>visible[v.cat]);if(!vis.length)continue;
+    const vis=items.filter(shown);if(!vis.length)continue;
     html+=`<li class="grp">${g} · ${vis.length}</li>`+vis.map(v=>`<li><button data-id="${v.id}"><span class="dot ${v.cat}"></span><span class="rname">${esc(v.name)}</span><span class="rmeta">${v.elev==null?'—':v.elev.toLocaleString('es-MX')+' m'}</span></button></li>`).join('');}
   vlist.innerHTML=html||`<li style="padding:10px;color:var(--muted)">Activa al menos una categoría en la leyenda.</li>`;
 }
@@ -1099,6 +1127,14 @@ async function upgradeCoasts(){
       const snap={x:cam.x,y:cam.y,z:cam.z};rasterize(g,true);Object.assign(cam,snap);return;
     }catch(_){}
   }
+}
+// ---------- Contador de visitas (GoatCounter) ----------
+const GOATCOUNTER='';   // código del sitio en GoatCounter, p. ej. 'eduardoluis'
+if(GOATCOUNTER&&location.hostname==='mapa.eduardoluis.blog'){
+  const sc=document.createElement('script');sc.async=true;sc.src='https://gc.zgo.at/count.js';
+  sc.dataset.goatcounter=`https://${GOATCOUNTER}.goatcounter.com/count`;document.head.appendChild(sc);
+  fetch(`https://${GOATCOUNTER}.goatcounter.com/counter/TOTAL.json`).then(r=>r.ok?r.json():null).then(j=>{if(!j||!j.count)return;
+    const el=document.getElementById('visits');el.textContent=`${j.count} visitas · `;el.hidden=false;}).catch(()=>{});
 }
 boot();
 </script>
