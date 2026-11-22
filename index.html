@@ -235,7 +235,7 @@ body.has-card .foot{display:none}
   <p class="src">Fuentes: <a href="https://education.nationalgeographic.org/resource/plate-tectonics-ring-fire/" target="_blank" rel="noopener">National Geographic</a> · <a href="https://www.britannica.com/place/Ring-of-Fire" target="_blank" rel="noopener">Britannica</a></p>
   <div class="actions"><button class="pbtn lava" id="ringReplay">VER DE NUEVO</button><button class="pbtn ghost" id="ringClose">CERRAR</button></div>
 </section>
-<footer class="attrib"><span id="visits" hidden></span>Mapa: <a href="https://eduardoluis.blog" target="_blank" rel="noopener">Eduardo Luis</a> · Datos: <a href="https://volcano.si.edu/" target="_blank" rel="noopener">Global Volcanism Program, Smithsonian</a> y Wikipedia · nov. 2026 · <button type="button" id="srcBtn">Fuentes</button></footer>
+<footer class="attrib"><span id="visits" hidden></span>Mapa: <a href="https://eduardoluis.blog" target="_blank" rel="noopener">Eduardo Luis</a> · Datos: <a href="https://volcano.si.edu/" target="_blank" rel="noopener">Global Volcanism Program, Smithsonian</a> y Wikipedia · Fronteras: <a href="https://www.naturalearthdata.com/" target="_blank" rel="noopener">Natural Earth</a> · nov. 2026 · <button type="button" id="srcBtn">Fuentes</button></footer>
 
 <div class="about box" id="about" hidden role="dialog" aria-label="Acerca del mapa">
   <h2>Acerca de este mapa</h2>
@@ -244,7 +244,7 @@ body.has-card .foot{display:none}
   <p><b>Música:</b> suena «Fuga», de Edoardo Lois, en versión 8-bit. Empieza sola en cuanto tocas el mapa; toca ♪ para apagarla o encenderla y ajusta el volumen con el control que aparece al lado.</p>
   <p><b>En vivo:</b> la lista «EN VIVO» muestra las erupciones en curso que reporta el <a href="https://volcano.si.edu/gvp_currenteruptions.cfm" target="_blank" rel="noopener">Global Volcanism Program</a> del Smithsonian, ordenadas por actividad más reciente. Se consulta automáticamente cada 3 horas. Los volcanes en erupción llevan un punto rojo parpadeante.</p>
   <p><b>Favoritos:</b> toca ☆ en la ficha de un volcán para guardarlo. Se guardan solo en este navegador.</p>
-  <p><b>Fuentes.</b> Altitud, última erupción, tipo y categoría vienen del <a href="https://volcano.si.edu/" target="_blank" rel="noopener">Global Volcanism Program</a> del Smithsonian (base Volcanoes of the World, consulta del 19 de noviembre de 2026). Cada ficha enlaza a su volcán en el GVP. Cuando el GVP agrupa varios conos en un solo campo volcánico (Paricutín, Jorullo, Xitle, Sunset Crater, Laki), la altitud o la fecha de ese cono vienen de Wikipedia, y la ficha lo indica. Los datos curiosos se contrastaron con los resúmenes geológicos del GVP y con Wikipedia en inglés y español, que citan los estudios originales.</p>
+  <p><b>Fuentes.</b> Altitud, última erupción, tipo y categoría vienen del <a href="https://volcano.si.edu/" target="_blank" rel="noopener">Global Volcanism Program</a> del Smithsonian (base Volcanoes of the World, consulta del 19 de noviembre de 2026). Cada ficha enlaza a su volcán en el GVP. Cuando el GVP agrupa varios conos en un solo campo volcánico (Paricutín, Jorullo, Xitle, Sunset Crater, Laki), la altitud o la fecha de ese cono vienen de Wikipedia, y la ficha lo indica. Los datos curiosos se contrastaron con los resúmenes geológicos del GVP y con Wikipedia en inglés y español, que citan los estudios originales. Las costas y las fronteras entre países vienen de <a href="https://www.naturalearthdata.com/" target="_blank" rel="noopener">Natural Earth</a> (dominio público).</p>
   <p style="color:var(--muted);font-size:13px">Las costas están simplificadas a propósito: es un mapa para explorar, no para navegar en barco.</p>
   <button class="pbtn" id="closeAbout">ENTENDIDO</button>
 </div>
@@ -635,7 +635,7 @@ const RANGES=[[-125,59,-114,50,6,0],[-114,50,-106,38,7,0],[-106,38,-105,33,4,0],
 [37,7,39,14,7,0],[30,-1,37,-5,4,0],[28,-29,31,-26,2,0],[146,-18,148,-37,3,0],[168,-45,172.5,-42.5,2,1],[137,35.5,138.5,36.5,2,0],[142,-5,138,-4,3,1]];
 const HANDMADE={features:OUTLINES.map(r=>({geometry:{type:'Polygon',coordinates:[r]}}))};
 // ---------- Rasterizar el mapa base ----------
-let BASE=null, MIPS=[], WAVES=[];
+let BASE=null, MIPS=[], WAVES=[], BORD=null;
 function rasterize(geo,withBorders){
   WAVES=[];
   const lc=document.createElement('canvas');lc.width=W;lc.height=H;const lg=lc.getContext('2d');
@@ -721,12 +721,16 @@ function rasterize(geo,withBorders){
       const pair=P[b], alt=(s>0.25||(s>-0.05&&((x+y)&1)))?1:0;
       let col=pair[alt];
       if(ld[i]===1){col=(Math.abs(lat)<42&&b!=='high'&&b!=='snow')?P.sand:shade(col,0.82);}
-      else if(border[i]&&ld[i]>=3){col=shade(col,0.62);}
       out[i]=u32(col);
     }
   }
   const c=document.createElement('canvas');c.width=W;c.height=H;c.getContext('2d').putImageData(img,0,0);
   BASE=c;MIPS=[c];
+  // fronteras entre países: capa aparte, casi transparente
+  BORD=null;
+  if(withBorders){const bi=new ImageData(W,H),bo=new Uint32Array(bi.data.buffer),bc2=u32('#fff6d8');let n=0;
+    for(let i=0;i<N;i++)if(border[i]&&land[i]&&ld[i]>=2){bo[i]=bc2;n++;}
+    if(n){BORD=document.createElement('canvas');BORD.width=W;BORD.height=H;BORD.getContext('2d').putImageData(bi,0,0);}}
   for(let k=1;k<=3;k++){const p=MIPS[k-1],m=document.createElement('canvas');m.width=Math.ceil(p.width/2);m.height=Math.ceil(p.height/2);
     const mg=m.getContext('2d');mg.imageSmoothingEnabled=false;mg.drawImage(p,0,0,m.width,m.height);MIPS.push(m);}
   // olitas decorativas en aguas profundas
@@ -908,7 +912,8 @@ function frame(t){
     const lvl=Math.max(0,Math.min(3,Math.floor(Math.log2(1/cam.z))));
     const ox=vw/2-cam.x*cam.z, oy=Math.round(vh/2-cam.y*cam.z), WZ=W*cam.z, hh=Math.round(H*cam.z);
     for(let k=Math.floor(-ox/WZ)-1;k<=Math.ceil((vw-ox)/WZ);k++){const x0=Math.round(ox+k*WZ),x1=Math.round(ox+(k+1)*WZ);
-      if(x1<0||x0>vw)continue;ctx.drawImage(MIPS[lvl],x0,oy,x1-x0+1,hh);}
+      if(x1<0||x0>vw)continue;ctx.drawImage(MIPS[lvl],x0,oy,x1-x0+1,hh);
+      if(BORD){ctx.save();ctx.globalAlpha=cam.z<1?0.22:0.3;ctx.imageSmoothingEnabled=cam.z<1;ctx.drawImage(BORD,x0,oy,x1-x0+1,hh);ctx.restore();}}
     // olas
     const wu=2, step=cam.z<0.9?3:1, ph=REDUCED?0:t/900;
     ctx.fillStyle='#5e9ad6';
@@ -1170,6 +1175,7 @@ async function boot(){
 }
 // Si el navegador puede descargar costas detalladas, se cambian sin bloquear nada.
 async function upgradeCoasts(){
+  try{const r=await fetch('data/paises.json');if(r.ok){const g=await r.json();if(g.features&&g.features.length>50){const snap={x:cam.x,y:cam.y,z:cam.z};rasterize(g,true);Object.assign(cam,snap);return;}}}catch(_){}
   const srcs=[['https://cdn.jsdelivr.net/npm/@amcharts/amcharts4-geodata@4.1.31/dist/script/worldLow.js','am4geodata_worldLow'],
               ['https://unpkg.com/@amcharts/amcharts4-geodata@4.1.31/dist/script/worldLow.js','am4geodata_worldLow']];
   for(const [src,name] of srcs){
