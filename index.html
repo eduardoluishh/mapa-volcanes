@@ -230,7 +230,7 @@ body.has-card .foot{display:none}
   <h2>Acerca de este mapa</h2>
   <p>Arrastra para moverte, usa la rueda o pellizca para hacer zoom y toca un volcán para ver su ficha. Las flechas del teclado y + / − también funcionan.</p>
   <p><b>Activo:</b> tuvo al menos una erupción en los últimos 50 años (desde 1976). <b>Dormido:</b> su última erupción fue antes, no tiene fecha registrada o es del Pleistoceno. Dormido no significa apagado: muchos pueden volver a despertar.</p>
-  <p><b>Música:</b> toca ♪ para escuchar «Fuga», de Edoardo Lois, en versión 8-bit, y ajusta el volumen con el control que aparece al lado. Se genera en tu navegador en tiempo real.</p>
+  <p><b>Música:</b> suena «Fuga», de Edoardo Lois, en versión 8-bit. Empieza sola en cuanto tocas el mapa; toca ♪ para apagarla o encenderla y ajusta el volumen con el control que aparece al lado.</p>
   <p><b>Favoritos:</b> toca ☆ en la ficha de un volcán para guardarlo. Se guardan solo en este navegador.</p>
   <p><b>Fuentes.</b> Altitud, última erupción, tipo y categoría vienen del <a href="https://volcano.si.edu/" target="_blank" rel="noopener">Global Volcanism Program</a> del Smithsonian (base Volcanoes of the World, consulta del 19 de noviembre de 2026). Cada ficha enlaza a su volcán en el GVP. Cuando el GVP agrupa varios conos en un solo campo volcánico (Paricutín, Jorullo, Xitle, Sunset Crater, Laki), la altitud o la fecha de ese cono vienen de Wikipedia, y la ficha lo indica. Los datos curiosos se contrastaron con los resúmenes geológicos del GVP y con Wikipedia en inglés y español, que citan los estudios originales.</p>
   <p style="color:var(--muted);font-size:13px">Las costas están simplificadas a propósito: es un mapa para explorar, no para navegar en barco.</p>
@@ -1192,7 +1192,8 @@ const Music=(()=>{let ac=null,master=null,n=null,timer=null,nextT=0,idx=0,vol=0.
   const level=()=>Math.max(0.0001,vol*vol*0.7);   // curva suave: el control se siente más natural
   function tick(){while(nextT<ac.currentTime+0.3){MusicCore.bar(n,idx++,nextT);nextT+=4*60/MusicCore.BPM;}}
   return {
-    get on(){return !!ac;}, get volume(){return vol;},
+    get on(){return !!ac;}, get volume(){return vol;}, get ctx(){return ac;},
+    pause(){if(ac&&ac.state==='running')ac.suspend();}, resume(){if(ac&&ac.state!=='running')ac.resume();},
     setVolume(v){vol=Math.max(0,Math.min(1,v));try{localStorage.setItem('volcanes-volumen',vol);}catch(_){}
       if(ac){master.gain.cancelScheduledValues(ac.currentTime);master.gain.setTargetAtTime(level(),ac.currentTime,.03);}},
     start(){if(ac)return true;const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return false;
@@ -1206,9 +1207,21 @@ const Music=(()=>{let ac=null,master=null,n=null,timer=null,nextT=0,idx=0,vol=0.
 const musicBtn=document.getElementById('musicBtn'),volBox=document.getElementById('volBox'),volRange=document.getElementById('volRange');
 volRange.value=Math.round(Music.volume*100);
 function syncMusicUI(){const on=Music.on;musicBtn.setAttribute('aria-pressed',on);musicBtn.setAttribute('aria-label',on?'Apagar música':'Activar música');volBox.hidden=!on;}
-musicBtn.onclick=()=>{if(Music.on)Music.stop();else if(!Music.start())return;syncMusicUI();};
+// Reproducción automática: arranca al cargar si el navegador lo permite, o con la primera interacción.
+// Si la persona apaga la música, se recuerda y no vuelve a sonar sola.
+const MKEY='volcanes-musica';
+const musicPref=()=>{try{return localStorage.getItem(MKEY)||'on';}catch(_){return 'on';}};
+const setPref=v=>{try{localStorage.setItem(MKEY,v);}catch(_){}};
+function unlockOnGesture(){
+  const go=e=>{if(e&&e.target&&e.target.closest&&e.target.closest('#musicBtn'))return;   // el botón ♪ se maneja solo
+    if(Music.on)Music.resume();else if(musicPref()!=='off'){Music.start();syncMusicUI();}
+    ['pointerdown','keydown','touchstart','wheel'].forEach(t=>removeEventListener(t,go,true));};
+  ['pointerdown','keydown','touchstart','wheel'].forEach(t=>addEventListener(t,go,{capture:true,passive:true}));
+}
+musicBtn.onclick=()=>{if(Music.on){Music.stop();setPref('off');}else{if(!Music.start())return;Music.resume();setPref('on');}syncMusicUI();};
 volRange.oninput=()=>Music.setVolume(volRange.value/100);
-document.addEventListener('visibilitychange',()=>{if(document.hidden&&Music.on){Music.stop();syncMusicUI();}});
+document.addEventListener('visibilitychange',()=>{if(!Music.on)return;document.hidden?Music.pause():Music.resume();});
+if(musicPref()!=='off'){Music.start();syncMusicUI();if(!Music.ctx||Music.ctx.state!=='running')unlockOnGesture();}
 
 // ---------- Contador de visitas (GoatCounter) ----------
 const GOATCOUNTER='';   // código del sitio en GoatCounter, p. ej. 'eduardoluis'
