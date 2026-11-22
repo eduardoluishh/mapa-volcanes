@@ -79,6 +79,11 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .pbtn.lava{background:var(--lava);color:#fff;box-shadow:inset -3px -3px 0 #a8300a,inset 3px 3px 0 #ff9a6e,4px 4px 0 rgba(7,11,34,.5)}
 .pbtn.ghost{background:var(--box);color:var(--paper);box-shadow:inset -3px -3px 0 #0b1233,inset 3px 3px 0 #2c3b7a,4px 4px 0 rgba(7,11,34,.5)}
 
+.tr{align-items:flex-start}
+.volbox{display:flex;align-items:center;gap:8px;padding:8px 10px;min-height:44px;box-sizing:border-box;border-width:3px;box-shadow:0 0 0 3px var(--ink)}
+.volbox label{font-family:var(--f-display);font-size:11px;letter-spacing:1px;color:var(--muted)}
+.volbox input{width:110px;accent-color:var(--gold)}
+#musicBtn[aria-pressed="true"]{background:var(--gold);color:#1a1430;box-shadow:inset -3px -3px 0 #c99a00,inset 3px 3px 0 #ffe98a,4px 4px 0 rgba(7,11,34,.5)}
 .zoom{position:fixed;z-index:5;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(38px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:10px}
 .zoom .pbtn{width:48px;height:48px;font-size:22px;padding:0}
 
@@ -136,6 +141,9 @@ body.has-card .foot{display:none}
 .about a{color:var(--gold)}
 
 @media (max-width:640px){
+  .volbox{position:fixed;z-index:6;right:calc(76px + env(safe-area-inset-right,0px));bottom:calc(44px + env(safe-area-inset-bottom,0px))}
+  .volbox input{width:84px}
+  body.has-card .volbox{display:none}
   body.ring-open .hud{display:none}
   .ringcard{padding:12px 14px 14px}
   .ringcard .fact{font-size:14px;line-height:1.4;margin-bottom:10px}
@@ -181,6 +189,8 @@ body.has-card .foot{display:none}
 </div>
 
 <div class="tr">
+  <button class="pbtn ghost" id="musicBtn" aria-pressed="false" aria-label="Activar música" title="Música">♪</button>
+  <div class="volbox box" id="volBox" hidden><label for="volRange">VOL</label><input type="range" id="volRange" min="0" max="100" step="1"></div>
   <button class="pbtn ghost" id="aboutBtn" aria-label="Acerca del mapa">?</button>
   <button class="pbtn" id="listBtn" aria-expanded="false" aria-controls="panel">LISTA</button>
 </div>
@@ -220,6 +230,7 @@ body.has-card .foot{display:none}
   <h2>Acerca de este mapa</h2>
   <p>Arrastra para moverte, usa la rueda o pellizca para hacer zoom y toca un volcán para ver su ficha. Las flechas del teclado y + / − también funcionan.</p>
   <p><b>Activo:</b> tuvo al menos una erupción en los últimos 50 años (desde 1976). <b>Dormido:</b> su última erupción fue antes, no tiene fecha registrada o es del Pleistoceno. Dormido no significa apagado: muchos pueden volver a despertar.</p>
+  <p><b>Música:</b> toca ♪ para escuchar «Fuga», de Edoardo Lois, en versión 8-bit, y ajusta el volumen con el control que aparece al lado. Se genera en tu navegador en tiempo real.</p>
   <p><b>Favoritos:</b> toca ☆ en la ficha de un volcán para guardarlo. Se guardan solo en este navegador.</p>
   <p><b>Fuentes.</b> Altitud, última erupción, tipo y categoría vienen del <a href="https://volcano.si.edu/" target="_blank" rel="noopener">Global Volcanism Program</a> del Smithsonian (base Volcanoes of the World, consulta del 19 de noviembre de 2026). Cada ficha enlaza a su volcán en el GVP. Cuando el GVP agrupa varios conos en un solo campo volcánico (Paricutín, Jorullo, Xitle, Sunset Crater, Laki), la altitud o la fecha de ese cono vienen de Wikipedia, y la ficha lo indica. Los datos curiosos se contrastaron con los resúmenes geológicos del GVP y con Wikipedia en inglés y español, que citan los estudios originales.</p>
   <p style="color:var(--muted);font-size:13px">Las costas están simplificadas a propósito: es un mapa para explorar, no para navegar en barco.</p>
@@ -1128,6 +1139,77 @@ async function upgradeCoasts(){
     }catch(_){}
   }
 }
+// ---------- Música 8-bit: «Fuga», de Edoardo Lois (Web Audio, sin archivos) ----------
+// 115 BPM, 4/4, Fa# menor, 8 compases en bucle. Arpegio (pulso 12.5 %), melodía (pulso 50 % + vibrato) desde el compás 5,
+// bajo triangular en negras con octavas y percusión de ruido blanco.
+const MusicCore={
+  BPM:115,
+  N:{C:0,'C#':1,D:2,'D#':3,E:4,F:5,'F#':6,G:7,'G#':8,A:9,'A#':10,B:11},
+  midi(s){return 12*(+s.slice(-1)+1)+this.N[s.slice(0,-1)];},
+  hz(m){return 440*Math.pow(2,(m-69)/12);},
+  ARP:[
+    [['C#5',1],['A4',.5],['F#4',.5],['E5',1],['C#5',.5],['A4',.5]],
+    [['B4',1],['G#4',.5],['E4',.5],['C#5',1],['B4',.5],['G#4',.5]],
+    [['A4',1],['F#4',.5],['D4',.5],['C#5',1],['A4',.5],['F#4',.5]],
+    [['G#4',1],['E4',.5],['C#4',.5],['B4',1],['G#4',.5],['E4',.5]]
+  ],
+  BASS:[['F#2','F#3','F#2','E2'],['E2','E3','E2','D2'],['D2','D3','D2','C#2'],['C#2','C#3','C#2','E2']],
+  LEAD:{4:[['F#5',3],['E5',1]],5:[['C#5',4]],6:[['B4',2],['C#5',1],['E5',1]],7:[['G#4',3],['A4',1]]},
+  pulse(ac,duty){const n=64,re=new Float32Array(n),im=new Float32Array(n);
+    for(let k=1;k<n;k++)im[k]=(2/(k*Math.PI))*Math.sin(k*Math.PI*duty);return ac.createPeriodicWave(re,im);},
+  build(ac,dest){
+    const n={ac,dest,w12:this.pulse(ac,.125),w50:this.pulse(ac,.5)};
+    const b=ac.createBuffer(1,ac.sampleRate,ac.sampleRate),d=b.getChannelData(0);for(let k=0;k<d.length;k++)d[k]=Math.random()*2-1;n.noise=b;
+    return n;
+  },
+  tone(n,wave,f,t,dur,vol,vib=0,attack=.005){
+    const ac=n.ac,o=ac.createOscillator(),g=ac.createGain();
+    typeof wave==='string'?o.type=wave:o.setPeriodicWave(wave);o.frequency.value=f;
+    if(vib){const l=ac.createOscillator(),lg=ac.createGain();l.frequency.value=5;lg.gain.value=vib;l.connect(lg);lg.connect(o.detune);l.start(t);l.stop(t+dur+.05);}
+    g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(vol,t+attack);
+    g.gain.setValueAtTime(vol,Math.max(t+attack,t+dur-.03));g.gain.linearRampToValueAtTime(0.0001,t+dur);
+    o.connect(g);g.connect(n.dest);o.start(t);o.stop(t+dur+.02);
+  },
+  hit(n,kind,t){
+    const ac=n.ac,src=ac.createBufferSource(),g=ac.createGain(),flt=ac.createBiquadFilter();src.buffer=n.noise;
+    if(kind==='kick'){flt.type='lowpass';flt.frequency.value=900;g.gain.setValueAtTime(.55,t);g.gain.exponentialRampToValueAtTime(.001,t+.12);
+      const o=ac.createOscillator(),og=ac.createGain();o.type='triangle';o.frequency.setValueAtTime(150,t);o.frequency.exponentialRampToValueAtTime(45,t+.12);
+      og.gain.setValueAtTime(.7,t);og.gain.exponentialRampToValueAtTime(.001,t+.16);o.connect(og);og.connect(n.dest);o.start(t);o.stop(t+.18);}
+    else if(kind==='snare'){flt.type='bandpass';flt.frequency.value=1900;flt.Q.value=.8;g.gain.setValueAtTime(.45,t);g.gain.exponentialRampToValueAtTime(.001,t+.13);}
+    else{flt.type='highpass';flt.frequency.value=7000;g.gain.setValueAtTime(.22,t);g.gain.exponentialRampToValueAtTime(.001,t+.04);}
+    src.connect(flt);flt.connect(g);g.connect(n.dest);src.start(t,Math.random()*.5);src.stop(t+.2);
+  },
+  bar(n,i,t){
+    const q=60/this.BPM,bar=i%8,b=bar%4;
+    let x=t;for(const [m,d] of this.ARP[b]){this.tone(n,n.w12,this.hz(this.midi(m)),x,d*q*.35,.16);x+=d*q;}
+    this.BASS[b].forEach((m,k)=>this.tone(n,'triangle',this.hz(this.midi(m)),t+k*q,q*.9,.42));
+    if(this.LEAD[bar]){x=t;for(const [m,d] of this.LEAD[bar]){this.tone(n,n.w50,this.hz(this.midi(m)),x,d*q*.97,.15,12,.02);x+=d*q;}}
+    for(let k=0;k<4;k++){this.hit(n,k%2?'snare':'kick',t+k*q);this.hit(n,'hat',t+k*q+q/2);}
+  }
+};
+const Music=(()=>{let ac=null,master=null,n=null,timer=null,nextT=0,idx=0,vol=0.6;
+  try{const v=parseFloat(localStorage.getItem('volcanes-volumen'));if(v>=0&&v<=1)vol=v;}catch(_){}
+  const level=()=>Math.max(0.0001,vol*vol*0.7);   // curva suave: el control se siente más natural
+  function tick(){while(nextT<ac.currentTime+0.3){MusicCore.bar(n,idx++,nextT);nextT+=4*60/MusicCore.BPM;}}
+  return {
+    get on(){return !!ac;}, get volume(){return vol;},
+    setVolume(v){vol=Math.max(0,Math.min(1,v));try{localStorage.setItem('volcanes-volumen',vol);}catch(_){}
+      if(ac){master.gain.cancelScheduledValues(ac.currentTime);master.gain.setTargetAtTime(level(),ac.currentTime,.03);}},
+    start(){if(ac)return true;const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return false;
+      ac=new AC();master=ac.createGain();master.gain.value=0.0001;master.connect(ac.destination);
+      master.gain.linearRampToValueAtTime(level(),ac.currentTime+0.5);
+      n=MusicCore.build(ac,master);idx=0;nextT=ac.currentTime+0.08;tick();timer=setInterval(tick,50);return true;},
+    stop(){if(!ac)return;clearInterval(timer);const a=ac;master.gain.cancelScheduledValues(a.currentTime);
+      master.gain.setValueAtTime(master.gain.value,a.currentTime);master.gain.linearRampToValueAtTime(0.0001,a.currentTime+0.3);
+      setTimeout(()=>{try{a.close();}catch(_){}},400);ac=null;n=null;}
+  };})();
+const musicBtn=document.getElementById('musicBtn'),volBox=document.getElementById('volBox'),volRange=document.getElementById('volRange');
+volRange.value=Math.round(Music.volume*100);
+function syncMusicUI(){const on=Music.on;musicBtn.setAttribute('aria-pressed',on);musicBtn.setAttribute('aria-label',on?'Apagar música':'Activar música');volBox.hidden=!on;}
+musicBtn.onclick=()=>{if(Music.on)Music.stop();else if(!Music.start())return;syncMusicUI();};
+volRange.oninput=()=>Music.setVolume(volRange.value/100);
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&Music.on){Music.stop();syncMusicUI();}});
+
 // ---------- Contador de visitas (GoatCounter) ----------
 const GOATCOUNTER='';   // código del sitio en GoatCounter, p. ej. 'eduardoluis'
 if(GOATCOUNTER&&location.hostname==='mapa.eduardoluis.blog'){
