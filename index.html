@@ -817,7 +817,7 @@ function drawVolcano(v,sx,sy,u,t){
 // ---------- Etiquetas ----------
 const PLACES=[
  ["CANADÁ",58,-108,0,1],["ESTADOS UNIDOS",39.5,-99,0,1],["MÉXICO",24.5,-103,1.4,1],["GROENLANDIA",73,-41,0,1],["ALASKA",64.5,-152,1.4,1],
- ["BRASIL",-10,-52,0,1],["ARGENTINA",-36,-65,1.4,1],["PERÚ",-9.5,-75,2,1],["COLOMBIA",4.5,-73,2,1],["CHILE",-27,-70.2,3,1],["BOLIVIA",-17,-64.5,2.5,1],["VENEZUELA",7.5,-66,2.5,1],["ECUADOR",-1.6,-78.3,4,1],
+ ["BRASIL",-10,-52,0,1],["ARGENTINA",-36,-65,1.4,1],["PERÚ",-9.5,-75,2,1],["COLOMBIA",4.5,-73,2,1],["CHILE",-27,-70.2,3,1],["BOLIVIA",-17,-64.5,2.5,1],["VENEZUELA",7.8,-64.6,2.5,1,"(no hay volcanes :-( )"],["ECUADOR",-1.6,-78.3,4,1],
  ["GUATEMALA",15.7,-90.3,5,1],["NICARAGUA",12.9,-85,5,1],["COSTA RICA",9.7,-84.1,7,1],["CUBA",21.6,-79,3,1],
  ["RUSIA",62,95,0,1],["CHINA",35,103,0,1],["INDIA",22,79,0,1],["AUSTRALIA",-25,134,0,1],["ANTÁRTIDA",-72,40,0,1],
  ["KAZAJISTÁN",48,67,1.4,1],["MONGOLIA",46.5,103,1.8,1],["IRÁN",32.5,54,1.8,1],["ARABIA SAUDITA",24,45,1.8,1],["TURQUÍA",39,35,2.2,1],
@@ -828,7 +828,7 @@ const PLACES=[
  ["OCÉANO PACÍFICO",-5,-135,0,2],["OCÉANO PACÍFICO",18,165,0,2],["OCÉANO ATLÁNTICO",28,-45,0,2],["OCÉANO ATLÁNTICO",-22,-18,1.4,2],["OCÉANO ÍNDICO",-22,80,0,2],["OCÉANO ÁRTICO",79,-150,1.4,2],
  ["MAR MEDITERRÁNEO",34.5,18,1.8,2],["MAR CARIBE",15,-76,2,2],["GOLFO DE MÉXICO",25.5,-90.5,2.2,2],["MAR ROJO",20,38.5,4,2],["MAR DE JAPÓN",40,134,3.5,2],["MAR DE BERING",58,-174,2.2,2],
  ["BAHÍA DE HUDSON",60,-86,2.2,2],["GALÁPAGOS",-1.6,-90.6,6,2]
-].map(([t,lat,lon,mz,k])=>({t,x:px(lon),y:py(lat),mz,k}));
+].map(([t,lat,lon,mz,k,sub])=>({t,x:px(lon),y:py(lat),mz,k,sub}));
 
 function label(text,x,y,size,fill,align){
   ctx.font=`${size}px Silkscreen, monospace`;ctx.textAlign=align||'center';ctx.textBaseline='middle';
@@ -919,7 +919,7 @@ function frame(t){
   if(BASE){for(const p of PLACES){if(RZ<p.mz*0.999)continue;
     const Y=(p.y-cam.y)*cam.z+vh/2;if(Y<-20||Y>vh+20)continue;
     for(const sx of screenXs(p.x,200)){
-    if(p.k===2)label(p.t,sx,Y,RZ>3.5?16:8,'#bfe3ff');else label(p.t,sx,Y,RZ>2.6?16:8,'#fff6d8');}}}
+    if(p.k===2)label(p.t,sx,Y,RZ>3.5?16:8,'#bfe3ff');else{const fs=RZ>2.6?16:8;label(p.t,sx,Y,fs,'#fff6d8');if(p.sub)label(p.sub,sx,Y+(fs>8?16:10),fs>8?11:8,'#ffd0c2');}}}}
 
   drawRing(t);
   // volcanes
