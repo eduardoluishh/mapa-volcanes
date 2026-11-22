@@ -893,8 +893,12 @@ document.getElementById('ringClose').onclick=closeRing;
 document.getElementById('ringReplay').onclick=()=>{ring={t0:performance.now()};};
 
 // ---------- Bucle de dibujo ----------
-let lastT=0, hitBoxes=[];
+let lastT=0, hitBoxes=[], lastInput=0;
+// Ahorro: a ritmo completo solo mientras hay movimiento o interacción; en reposo, ~15 cuadros por segundo.
+for(const ev of ['pointermove','pointerdown','wheel','keydown','touchmove'])addEventListener(ev,()=>{lastInput=performance.now();},{passive:true,capture:true});
 function frame(t){
+  const busy=fly||inertia||drag||pinch||shake>0||particles.length||t-lastInput<1200;
+  if(!busy&&t-lastT<(REDUCED?250:62)){requestAnimationFrame(frame);return;}
   const dt=Math.min(50,t-lastT);lastT=t;
   if(fly){const k=Math.min(1,(t-fly.t0)/fly.d),e=k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;
     cam.x=fly.a.x+(fly.b.x-fly.a.x)*e;cam.y=fly.a.y+(fly.b.y-fly.a.y)*e;
@@ -1161,28 +1165,17 @@ addEventListener('hashchange',()=>{const v=V.find(x=>'#'+x.id===location.hash);i
   draw();})();
 
 // ---------- Arranque ----------
-function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
 async function boot(){
   resize();Object.assign(cam,home());
   addEventListener('resize',()=>{const was=fitZoom();resize();if(Math.abs(cam.z-was)<0.001)Object.assign(cam,home());});
   requestAnimationFrame(t=>{lastT=t;frame(t);});
   try{await Promise.race([document.fonts.load('16px Silkscreen'),new Promise(r=>setTimeout(r,1200))]);}catch(_){}
-  rasterize(HANDMADE,false);
+  // un solo pintado: costas y fronteras reales; si no llegan a tiempo, las dibujadas a mano
+  let geo=null;
+  try{geo=await Promise.race([fetch('data/paises.json').then(r=>r.ok?r.json():null),new Promise(r=>setTimeout(()=>r(null),6000))]);}catch(_){}
+  if(geo&&geo.features&&geo.features.length>50)rasterize(geo,true);else rasterize(HANDMADE,false);
   document.getElementById('loading').hidden=true;
-  upgradeCoasts();
   const v=V.find(x=>'#'+x.id===location.hash);if(v)select(v,false);
-}
-// Si el navegador puede descargar costas detalladas, se cambian sin bloquear nada.
-async function upgradeCoasts(){
-  try{const r=await fetch('data/paises.json');if(r.ok){const g=await r.json();if(g.features&&g.features.length>50){const snap={x:cam.x,y:cam.y,z:cam.z};rasterize(g,true);Object.assign(cam,snap);return;}}}catch(_){}
-  const srcs=[['https://cdn.jsdelivr.net/npm/@amcharts/amcharts4-geodata@4.1.31/dist/script/worldLow.js','am4geodata_worldLow'],
-              ['https://unpkg.com/@amcharts/amcharts4-geodata@4.1.31/dist/script/worldLow.js','am4geodata_worldLow']];
-  for(const [src,name] of srcs){
-    try{await Promise.race([loadScript(src),new Promise((_,rej)=>setTimeout(rej,10000))]);
-      const g=window[name];if(!g||!g.features||g.features.length<50)continue;
-      const snap={x:cam.x,y:cam.y,z:cam.z};rasterize(g,true);Object.assign(cam,snap);return;
-    }catch(_){}
-  }
 }
 // ---------- Música 8-bit: «Fuga», de Edoardo Lois (Web Audio, sin archivos) ----------
 // 115 BPM, 4/4, Fa# menor, 8 compases en bucle. Arpegio (pulso 12.5 %), melodía (pulso 50 % + vibrato) desde el compás 5,
