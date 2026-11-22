@@ -806,7 +806,10 @@ function drawVolcano(v,sx,sy,u,t){
       ctx.fillStyle='#070b22';ctx.fillRect(ax-4*u,ay-u,8*u,u*5);
       ctx.fillStyle='#ffd23f';ctx.fillRect(ax-3*u,ay,6*u,u);ctx.fillRect(ax-2*u,ay+u,4*u,u);ctx.fillRect(ax-u,ay+2*u,2*u,u);}
   }
-  if(v.live&&(REDUCED||((t/500|0)%2===0))){const d=2*u,lx=ox-u,ly=oy-2*u;ctx.fillStyle='#070b22';ctx.fillRect(lx-u,ly-u,d+2*u,d+2*u);ctx.fillStyle='#ff2a2a';ctx.fillRect(lx,ly,d,d);}
+  if(v.live&&(REDUCED||((t/500|0)%2===0))){ // gota de lava justo sobre el cráter
+    const BLOB=[[5,-5,'#ffd23f'],[4,-4,'#ff2a2a'],[5,-4,'#ffd23f'],[6,-4,'#ff2a2a']];
+    ctx.fillStyle='#070b22';BLOB.forEach(([c,r])=>{ctx.fillRect(ox+(c-1)*u,oy+r*u,u*3,u);ctx.fillRect(ox+c*u,oy+(r-1)*u,u,u*3);});
+    BLOB.forEach(([c,r,col])=>{ctx.fillStyle=col;ctx.fillRect(ox+c*u,oy+r*u,u,u);});}
   if(favs.has(v.id)){const sx0=ox+w-2*u,sy0=oy-3*u;
     const STAR=["..#..",".###.","#####",".###.","#.#.#"];
     ctx.fillStyle='#070b22';STAR.forEach((r,ri)=>{for(let c=0;c<5;c++)if(r[c]==='#'){ctx.fillRect(sx0+(c-1)*u,sy0+ri*u,u*3,u);ctx.fillRect(sx0+c*u,sy0+(ri-1)*u,u,u*3);}});
