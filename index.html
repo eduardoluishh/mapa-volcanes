@@ -99,6 +99,16 @@ body.has-card .foot{display:none}
 .panel header{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:3px solid var(--paper)}
 .panel h2{margin:0;font-family:var(--f-display);font-size:16px;color:var(--gold)}
 .vlist{list-style:none;margin:0;padding:6px;overflow:auto;flex:1;min-height:0}
+.livedot{display:inline-block;width:9px;height:9px;background:#ff2a2a;box-shadow:0 0 0 2px var(--ink);margin-right:9px;vertical-align:1px;animation:blink 1s steps(1) infinite}
+.pbtn.live{gap:0}
+.panel h2{display:flex;align-items:center}
+.livemeta{margin:0;padding:8px 12px 6px;font-size:12px;line-height:1.4;color:var(--muted);border-bottom:2px solid var(--box-2)}
+.livemeta a{color:inherit}
+.vlist .lrow{flex-wrap:wrap;row-gap:2px}
+.vlist .lrow .rname{flex:1 1 60%}
+.vlist .lrow .rsub{flex:1 1 100%;font-size:12px;color:var(--muted);padding-left:20px}
+.vlist .lrow .rmeta{font-variant-numeric:tabular-nums}
+.tag.live{background:#ff2a2a;color:#fff;margin-left:6px}
 .vlist .grp{font-family:var(--f-display);font-size:11px;color:var(--muted);letter-spacing:1px;padding:10px 8px 4px}
 
 /* Tarjeta de info */
@@ -165,7 +175,7 @@ body.has-card .foot{display:none}
 }
 @media (max-height:560px) and (max-width:900px){ .legend,.ring{display:none} }
 @media (max-width:640px){ .ring{font-size:10px;min-height:34px;padding:6px 8px} }
-@media (prefers-reduced-motion:reduce){ .blink,.pbar i{animation:none} }
+@media (prefers-reduced-motion:reduce){ .blink,.pbar i,.livedot{animation:none} }
 </style>
 </head>
 <body>
@@ -192,11 +202,12 @@ body.has-card .foot{display:none}
   <button class="pbtn ghost" id="musicBtn" aria-pressed="false" aria-label="Activar música" title="Música">♪</button>
   <div class="volbox box" id="volBox" hidden><label for="volRange">VOL</label><input type="range" id="volRange" min="0" max="100" step="1"></div>
   <button class="pbtn ghost" id="aboutBtn" aria-label="Acerca del mapa">?</button>
-  <button class="pbtn" id="listBtn" aria-expanded="false" aria-controls="panel">LISTA</button>
+  <button class="pbtn live" id="listBtn" aria-expanded="false" aria-controls="panel"><span class="livedot" aria-hidden="true"></span>EN VIVO</button>
 </div>
 
 <aside class="panel box" id="panel" hidden>
-  <header><h2>Por región</h2><button class="pbtn ghost" id="closeList" aria-label="Cerrar lista" style="min-height:36px;min-width:36px;padding:4px 8px">×</button></header>
+  <header><h2><span class="livedot" aria-hidden="true"></span>En erupción ahora</h2><button class="pbtn ghost" id="closeList" aria-label="Cerrar lista" style="min-height:36px;min-width:36px;padding:4px 8px">×</button></header>
+  <p class="livemeta" id="liveMeta">Cargando datos del Smithsonian…</p>
   <ul class="vlist" id="vlist"></ul>
 </aside>
 
@@ -231,6 +242,7 @@ body.has-card .foot{display:none}
   <p>Arrastra para moverte, usa la rueda o pellizca para hacer zoom y toca un volcán para ver su ficha. Las flechas del teclado y + / − también funcionan.</p>
   <p><b>Activo:</b> tuvo al menos una erupción en los últimos 50 años (desde 1976). <b>Dormido:</b> su última erupción fue antes, no tiene fecha registrada o es del Pleistoceno. Dormido no significa apagado: muchos pueden volver a despertar.</p>
   <p><b>Música:</b> suena «Fuga», de Edoardo Lois, en versión 8-bit. Empieza sola en cuanto tocas el mapa; toca ♪ para apagarla o encenderla y ajusta el volumen con el control que aparece al lado.</p>
+  <p><b>En vivo:</b> la lista «EN VIVO» muestra las erupciones en curso que reporta el <a href="https://volcano.si.edu/gvp_currenteruptions.cfm" target="_blank" rel="noopener">Global Volcanism Program</a> del Smithsonian, ordenadas por actividad más reciente. Se consulta automáticamente cada 3 horas. Los volcanes en erupción llevan un punto rojo parpadeante.</p>
   <p><b>Favoritos:</b> toca ☆ en la ficha de un volcán para guardarlo. Se guardan solo en este navegador.</p>
   <p><b>Fuentes.</b> Altitud, última erupción, tipo y categoría vienen del <a href="https://volcano.si.edu/" target="_blank" rel="noopener">Global Volcanism Program</a> del Smithsonian (base Volcanoes of the World, consulta del 19 de noviembre de 2026). Cada ficha enlaza a su volcán en el GVP. Cuando el GVP agrupa varios conos en un solo campo volcánico (Paricutín, Jorullo, Xitle, Sunset Crater, Laki), la altitud o la fecha de ese cono vienen de Wikipedia, y la ficha lo indica. Los datos curiosos se contrastaron con los resúmenes geológicos del GVP y con Wikipedia en inglés y español, que citan los estudios originales.</p>
   <p style="color:var(--muted);font-size:13px">Las costas están simplificadas a propósito: es un mapa para explorar, no para navegar en barco.</p>
@@ -794,6 +806,7 @@ function drawVolcano(v,sx,sy,u,t){
       ctx.fillStyle='#070b22';ctx.fillRect(ax-4*u,ay-u,8*u,u*5);
       ctx.fillStyle='#ffd23f';ctx.fillRect(ax-3*u,ay,6*u,u);ctx.fillRect(ax-2*u,ay+u,4*u,u);ctx.fillRect(ax-u,ay+2*u,2*u,u);}
   }
+  if(v.live&&(REDUCED||((t/500|0)%2===0))){const d=2*u,lx=ox-u,ly=oy-2*u;ctx.fillStyle='#070b22';ctx.fillRect(lx-u,ly-u,d+2*u,d+2*u);ctx.fillStyle='#ff2a2a';ctx.fillRect(lx,ly,d,d);}
   if(favs.has(v.id)){const sx0=ox+w-2*u,sy0=oy-3*u;
     const STAR=["..#..",".###.","#####",".###.","#.#.#"];
     ctx.fillStyle='#070b22';STAR.forEach((r,ri)=>{for(let c=0;c<5;c++)if(r[c]==='#'){ctx.fillRect(sx0+(c-1)*u,sy0+ri*u,u*3,u);ctx.fillRect(sx0+c*u,sy0+(ri-1)*u,u,u*3);}});
@@ -837,7 +850,8 @@ const RING_LINES=[
 ];
 const RING=RING_LINES.map(pts=>{const P=pts.map(([lo,la])=>[px(lo),py(la)]);const L=[0];for(let i=1;i<P.length;i++)L.push(L[i-1]+Math.hypot(P[i][0]-P[i-1][0],P[i][1]-P[i-1][1]));return {pts,P,L,len:L[L.length-1]};});
 function segDist(x,y,a,b){const dx=b[0]-a[0],dy=b[1]-a[1];const t=Math.max(0,Math.min(1,((x-a[0])*dx+(y-a[1])*dy)/(dx*dx+dy*dy||1)));return Math.hypot(x-a[0]-t*dx,y-a[1]-t*dy);}
-V.forEach(v=>{let best=1e9;for(const r of RING)for(let i=1;i<r.pts.length;i++)for(const lon of [v.lon,v.lon-360,v.lon+360])best=Math.min(best,segDist(lon,v.lat,r.pts[i-1],r.pts[i]));v.ring=best<5;});
+function ringOf(v){let best=1e9;for(const r of RING)for(let i=1;i<r.pts.length;i++)for(const lon of [v.lon,v.lon-360,v.lon+360])best=Math.min(best,segDist(lon,v.lat,r.pts[i-1],r.pts[i]));return best<5;}
+V.forEach(v=>{v.ring=ringOf(v);});
 let ring=null;
 function openRing(){ring={t0:performance.now()};document.getElementById('ringCount').textContent=`${V.filter(v=>v.ring).length} de ${V.length}`;
   document.getElementById('ringcard').hidden=false;document.body.classList.add('has-card','ring-open');}
@@ -1029,11 +1043,11 @@ function select(v,fromMap){
   selected=v;
   const elev=v.elev==null?'Fisura sin cumbre':v.elev<0?`${(v.elev).toLocaleString('es-MX')} m (bajo el mar)`:`${v.elev.toLocaleString('es-MX')} m`;
   card.innerHTML=`<div class="top"><h3>${esc(v.name)}</h3><button class="x" id="cx" aria-label="Cerrar ficha">×</button></div>
-  <div><span class="tag ${v.cat}">${CAT[v.cat].short}</span><span class="country">${esc(v.country)}</span></div>
-  <dl class="stats"><div><dt>ALTITUD</dt><dd>${elev}</dd></div><div><dt>ÚLTIMA ERUPCIÓN</dt><dd>${esc(v.last)}</dd></div>
+  <div><span class="tag ${v.cat}">${CAT[v.cat].short}</span>${v.live?'<span class="tag live">● EN ERUPCIÓN</span>':''}<span class="country">${esc(v.country)}</span></div>
+  <dl class="stats"><div><dt>ALTITUD</dt><dd>${elev}</dd></div><div><dt>${v.live?'ÚLTIMA ACTIVIDAD':'ÚLTIMA ERUPCIÓN'}</dt><dd>${v.live?esc(fmtDate(v.live.last)):esc(v.last)}</dd></div>
   <div><dt>TIPO</dt><dd>${esc(v.type)}</dd></div><div><dt>COORDENADAS</dt><dd>${fmtLat(v.lat)} ${fmtLon(v.lon)}</dd></div></dl>
   <p class="fact">${esc(v.fact)}</p>
-  <p class="src">Fuente: <a href="https://volcano.si.edu/volcano.cfm?vn=${v.gvp}" target="_blank" rel="noopener">Global Volcanism Program #${v.gvp}</a>${v.alt?' · '+esc(v.alt):''}</p>
+  <p class="src">Fuente: <a href="https://volcano.si.edu/volcano.cfm?vn=${v.gvp}" target="_blank" rel="noopener">Global Volcanism Program #${v.gvp}</a>${v.live&&v.live.start?' · En erupción desde '+esc(fmtDate(v.live.start)):''}${v.alt?' · '+esc(v.alt):''}</p>
   <div class="actions"><button class="pbtn lava" id="boom">¡ERUPCIÓN!</button><button class="pbtn ghost" id="zoomTo">ACERCAR</button><button class="pbtn ghost fav" id="favBtn" aria-pressed="${favs.has(v.id)}">${favs.has(v.id)?'★ FAVORITO':'☆ FAVORITO'}</button></div>`;
   card.hidden=false;document.body.classList.add('has-card');
   document.getElementById('cx').onclick=closeCard;
@@ -1048,12 +1062,14 @@ function offsetY(z){return (innerWidth<=640?card.offsetHeight/2+20:0)/z;}
 function closeCard(){selected=null;card.hidden=true;document.body.classList.remove('has-card');try{history.replaceState(null,'',location.pathname+location.search);}catch(_){}}
 
 // ---------- Leyenda, búsqueda y lista ----------
-const legend=document.getElementById('legend');
+const legend=document.getElementById('legend'),catChips={};
+function updateLegendCounts(){for(const k in catChips)catChips[k].querySelector('.n').textContent=V.filter(v=>v.cat===k).length;
+  document.getElementById('subtitle').textContent=`${V.length} volcanes, de Islandia a la Antártida`;}
 for(const k of ['a','d']){const n=V.filter(v=>v.cat===k).length;
   const b=document.createElement('button');b.className='chip';b.setAttribute('aria-pressed','true');
   b.innerHTML=`<span class="dot ${k}"></span>${CAT[k].short}<span class="n">${n}</span>`;
   b.onclick=()=>{visible[k]=!visible[k];b.setAttribute('aria-pressed',visible[k]);if(selected&&!visible[selected.cat])closeCard();renderList();};
-  legend.appendChild(b);}
+  catChips[k]=b;legend.appendChild(b);}
 const favChip=document.createElement('button');favChip.className='chip favchip';favChip.setAttribute('aria-pressed','false');
 favChip.title='Muestra solo tus volcanes favoritos';
 function updateFavChip(){favChip.innerHTML=`<span class="star">★</span>FAVORITOS<span class="n">${favs.size}</span>`;
@@ -1085,17 +1101,38 @@ function pick(v){q.value='';results.hidden=true;q.blur();if(onlyFavs&&!favs.has(
 document.addEventListener('pointerdown',e=>{if(!e.target.closest('.search'))results.hidden=true;});
 
 const panel=document.getElementById('panel'), listBtn=document.getElementById('listBtn'), vlist=document.getElementById('vlist');
-function renderList(){
-  const am=v=>v.region==='am';
-  const groups=[["★ MIS FAVORITOS",v=>favs.has(v.id)],["NORTEAMÉRICA",v=>am(v)&&(v.lat>=21.5&&v.lon<-95||v.lat>=24)],["MÉXICO Y CENTROAMÉRICA",v=>am(v)&&v.lat>=7&&v.lon<-77],["CARIBE",v=>am(v)&&v.lon>-65&&v.lat>10],["SUDAMÉRICA",am],
-    ["EUROPA Y ATLÁNTICO",v=>v.region==='eu'],["ÁFRICA Y MEDIO ORIENTE",v=>v.region==='af'],["ASIA",v=>v.region==='as'],["OCEANÍA Y PACÍFICO",v=>v.region==='oc'],["ANTÁRTIDA",v=>v.region==='an']];
-  const used=new Set();let html='';
-  for(const [g,fn] of groups){const items=V.filter(v=>!used.has(v)&&fn(v)).sort((a,b)=>b.lat-a.lat);items.forEach(v=>used.add(v));
-    const vis=items.filter(shown);if(!vis.length)continue;
-    html+=`<li class="grp">${g} · ${vis.length}</li>`+vis.map(v=>`<li><button data-id="${v.id}"><span class="dot ${v.cat}"></span><span class="rname">${esc(v.name)}</span><span class="rmeta">${v.elev==null?'—':v.elev.toLocaleString('es-MX')+' m'}</span></button></li>`).join('');}
-  vlist.innerHTML=html||`<li style="padding:10px;color:var(--muted)">Activa al menos una categoría en la leyenda.</li>`;
+const MESES=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+function fmtDate(iso){if(!iso)return '—';const [y,m,d]=iso.split('-');if(!m)return y;return (d?(+d)+' ':'')+MESES[+m-1]+' '+y;}
+function hace(iso){if(!iso||iso.length<10)return '';const dias=Math.round((Date.now()-Date.parse(iso+'T12:00:00Z'))/864e5);
+  return dias<=0?'hoy':dias===1?'ayer':dias<60?`hace ${dias} días`:'';}
+const LIVE={data:null,error:false};
+function addLiveVolcano(e){
+  const v={id:'gvp-'+e.gvp,name:e.nombre,country:e.pais,lat:e.lat,lon:e.lon,elev:e.altitud,last:'En curso',cat:'a',type:e.tipo,
+    fact:'Está en erupción según el Global Volcanism Program del Smithsonian.',region:'live',gvp:e.gvp,alt:''};
+  v.x=px(v.lon);v.y=py(v.lat);v.seed=(Math.sin(v.lat*12.9898+v.lon*78.233)*43758.5453)%1;if(v.seed<0)v.seed+=1;v.ring=ringOf(v);
+  V.push(v);return v;
 }
-vlist.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const v=V.find(x=>x.id===b.dataset.id);if(innerWidth<=640)closeList();select(v,false);});
+function loadLive(){
+  fetch('data/erupciones.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error(r.status);return r.json();}).then(d=>{
+    LIVE.data=d;LIVE.error=false;
+    for(const e of d.erupciones){if(e.lat==null||e.lon==null)continue;
+      const v=V.find(x=>x.gvp===e.gvp)||addLiveVolcano(e);
+      if(!v.live||(e.ultima_actividad||'')>(v.live.last||''))v.live={start:e.inicio,last:e.ultima_actividad};
+      v.cat='a';}
+    updateLegendCounts();renderList();
+  }).catch(()=>{LIVE.error=true;renderList();});
+}
+function renderList(){
+  const meta=document.getElementById('liveMeta');
+  if(!LIVE.data){meta.textContent=LIVE.error?'La lista en vivo se actualiza en mapa.eduardoluis.blog. Aquí no se pudo cargar.':'Cargando datos del Smithsonian…';vlist.innerHTML='';return;}
+  const d=LIVE.data,c=new Date(d.consultado);
+  meta.innerHTML=`${d.total} erupciones en curso según el <a href="${d.fuente_url}" target="_blank" rel="noopener">Global Volcanism Program</a> (Smithsonian). Actualizado el ${c.toLocaleString('es-MX',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}`;
+  const seen=new Set();
+  vlist.innerHTML=d.erupciones.filter(e=>!seen.has(e.gvp)&&seen.add(e.gvp)).map(e=>{const v=V.find(x=>x.gvp===e.gvp);if(!v)return '';
+    const h=hace(e.ultima_actividad);
+    return `<li><button class="lrow" data-id="${v.id}"><span class="livedot" aria-hidden="true"></span><span class="rname">${esc(v.name)}</span><span class="rmeta">${esc(fmtDate(e.ultima_actividad))}</span><span class="rsub">${esc(v.country)} · desde ${esc(fmtDate(e.inicio))}${h?' · última actividad '+h:''}</span></button></li>`;}).join('');
+}
+vlist.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const v=V.find(x=>x.id===b.dataset.id);if(!v)return;if(!shown(v)){onlyFavs=false;favChip.setAttribute('aria-pressed','false');visible[v.cat]=true;catChips[v.cat].setAttribute('aria-pressed','true');}if(innerWidth<=640)closeList();select(v,false);});
 function openList(){panel.hidden=false;listBtn.setAttribute('aria-expanded','true');}
 function closeList(){panel.hidden=true;listBtn.setAttribute('aria-expanded','false');}
 listBtn.onclick=()=>panel.hidden?openList():closeList();
@@ -1104,7 +1141,7 @@ const about=document.getElementById('about');
 document.getElementById('aboutBtn').onclick=()=>{about.hidden=!about.hidden;};
 document.getElementById('srcBtn').onclick=()=>{about.hidden=false;};
 document.getElementById('closeAbout').onclick=()=>{about.hidden=true;};
-renderList();
+renderList();loadLive();
 
 addEventListener('hashchange',()=>{const v=V.find(x=>'#'+x.id===location.hash);if(v&&v!==selected)select(v,false);});
 
