@@ -996,7 +996,7 @@ function frame(t){
   drawRing(t);
   // volcanes
   const u=U();hitBoxes=[];
-  const list=V.filter(shown).sort((a,b)=>a.y-b.y);
+  const list=V.filter(shown).sort((a,b)=>(a===selected)-(b===selected)||(a===hovered)-(b===hovered)||a.y-b.y); // el seleccionado se dibuja al frente
   for(const v of list){const Y=(v.y-cam.y)*cam.z+vh/2;if(Y<-80||Y>vh+60)continue;
     ctx.globalAlpha=ring&&!v.ring?0.3:1;for(const sx of screenXs(v.x,60)){const b=drawVolcano(v,sx,Y,u,t);hitBoxes.push({v,b,sx,sy:Y});}ctx.globalAlpha=1;}
   // nombres
