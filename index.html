@@ -1214,7 +1214,7 @@ function renderList(){
   if(!LIVE.data){meta.textContent=LIVE.error?L('La lista en vivo se actualiza en mapa.eduardoluis.blog. Aquí no se pudo cargar.','The live list updates on mapa.eduardoluis.blog. It couldn’t load here.'):L('Cargando datos del Smithsonian…','Loading Smithsonian data…');vlist.innerHTML='';return;}
   const d=LIVE.data,c=new Date(d.consultado);
   const when=c.toLocaleString(L('es-MX','en-US'),{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
-  meta.innerHTML=L(`${d.total} erupciones en curso según el <a href="${d.fuente_url}" target="_blank" rel="noopener">Global Volcanism Program</a> (Smithsonian). Actualizado el ${when}`,`${d.total} ongoing eruptions according to the Smithsonian’s <a href="${d.fuente_url}" target="_blank" rel="noopener">Global Volcanism Program</a>. Updated ${when}`);
+  meta.innerHTML=L(`${d.total} erupciones en curso según el <a href="${d.fuente_url}" target="_blank" rel="noopener">Global Volcanism Program</a> (Smithsonian). Actualización semanal.`,`${d.total} ongoing eruptions according to the Smithsonian’s <a href="${d.fuente_url}" target="_blank" rel="noopener">Global Volcanism Program</a>. Weekly update.`);
   const seen=new Set();
   vlist.innerHTML=d.erupciones.filter(e=>!seen.has(e.gvp)&&seen.add(e.gvp)).map(e=>{const v=V.find(x=>x.gvp===e.gvp);if(!v)return '';
     const h=hace(e.ultima_actividad);
