@@ -929,7 +929,7 @@ const PLATES_EN={"PACÍFICO":"PACIFIC","NORTEAMERICANA":"NORTH AMERICAN","SUDAME
 const PLATE_LABELS=PLATE_NAMES.map(([t,lat,lon,c])=>({t,es:t,x:px(lon),y:py(lat),col:PLATE_COL[c]}));
 async function loadPlates(){
   if(PLATES||platesLoading)return;platesLoading=true;
-  try{const d=await (await fetch('data/placas.json')).json();
+  try{const d=await (await fetch('data/placas.json',{cache:'no-cache'})).json();
     const c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');
     for(const pl of d.placas){g.fillStyle=PLATE_COL[pl.c]||'#ced4da';const path=new Path2D();
       for(const poly of pl.p)for(const ring of poly){ring.forEach(([lon,lat],i)=>i?path.lineTo(px(lon),py(lat)):path.moveTo(px(lon),py(lat)));path.closePath();}
@@ -1252,7 +1252,7 @@ async function boot(){
   try{await Promise.race([document.fonts.load('16px Silkscreen'),new Promise(r=>setTimeout(r,1200))]);}catch(_){}
   // un solo pintado: costas y fronteras reales; si no llegan a tiempo, las dibujadas a mano
   let geo=null;
-  try{geo=await Promise.race([fetch('data/paises.json').then(r=>r.ok?r.json():null),new Promise(r=>setTimeout(()=>r(null),6000))]);}catch(_){}
+  try{geo=await Promise.race([fetch('data/paises.json',{cache:'no-cache'}).then(r=>r.ok?r.json():null),new Promise(r=>setTimeout(()=>r(null),6000))]);}catch(_){}
   if(geo&&geo.features&&geo.features.length>50)rasterize(geo,true);else rasterize(HANDMADE,false);
   document.getElementById('loading').hidden=true;
   const v=V.find(x=>'#'+x.id===location.hash);if(v)select(v,false);
