@@ -1000,7 +1000,8 @@ function frame(t){
   for(const v of list){const Y=(v.y-cam.y)*cam.z+vh/2;if(Y<-80||Y>vh+60)continue;
     ctx.globalAlpha=ring&&!v.ring?0.3:1;for(const sx of screenXs(v.x,60)){const b=drawVolcano(v,sx,Y,u,t);hitBoxes.push({v,b,sx,sy:Y});}ctx.globalAlpha=1;}
   // nombres
-  const placed=[];
+  // el volcán seleccionado (o bajo el cursor) reserva su espacio: los nombres vecinos no se le enciman
+  const placed=hitBoxes.filter(hb=>hb.v===selected||hb.v===hovered).map(hb=>({x:hb.b.x-2,y:hb.b.y-2,w:hb.b.w+4,h:hb.b.h+4}));
   const showAll=cam.z>=3.9;
   for(const hb of hitBoxes.slice().sort((a,b)=>(b.v===selected)-(a.v===selected)||(b.v===hovered)-(a.v===hovered)||b.v.elev-a.v.elev)){
     const v=hb.v;if(!showAll&&v!==selected&&v!==hovered)continue;
