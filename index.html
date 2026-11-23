@@ -99,6 +99,14 @@ body.has-card .foot{display:none}
 .panel header{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:3px solid var(--paper)}
 .panel h2{margin:0;font-family:var(--f-display);font-size:16px;color:var(--gold)}
 .vlist{list-style:none;margin:0;padding:6px;overflow:auto;flex:1;min-height:0}
+.platechip .pk{display:inline-block;width:12px;height:9px;background:linear-gradient(90deg,#ff7eb6 0 50%,#66d9e8 50%);box-shadow:0 0 0 2px var(--ink);position:relative}
+.platechip .pk::after{content:'';position:absolute;left:5px;top:-2px;width:2px;height:13px;background:#ff4d2e}
+.platekey{max-width:330px;margin-top:8px;padding:8px 10px;font-size:12px;line-height:1.35;color:var(--paper);background:var(--box);border:3px solid var(--ink);display:flex;flex-direction:column;gap:6px;pointer-events:auto}
+.platekey[hidden]{display:none}
+@media (max-width:640px){.platekey{font-size:11px;padding:6px 8px;max-width:250px}}
+.platekey i{display:inline-block;width:22px;height:4px;margin-right:8px;vertical-align:3px;box-shadow:0 0 0 1px #070b22}
+.platekey .ksub{background:#ff4d2e;height:5px}
+.platekey .koth{background:repeating-linear-gradient(90deg,#fff3bf 0 6px,transparent 6px 10px)}
 .livedot{display:inline-block;width:9px;height:9px;background:#ff2a2a;box-shadow:0 0 0 2px var(--ink);margin-right:9px;vertical-align:1px;animation:blink 1s steps(1) infinite}
 .pbtn.live{gap:0}
 .panel h2{display:flex;align-items:center}
@@ -243,7 +251,7 @@ body.has-card .foot{display:none}
   <p><b>Activo:</b> tuvo al menos una erupción en los últimos 50 años (desde 1976). <b>Dormido:</b> su última erupción fue antes, no tiene fecha registrada o es del Pleistoceno. Dormido no significa apagado: muchos pueden volver a despertar.</p>
   <p><b>En vivo:</b> la lista «EN VIVO» muestra las erupciones en curso que reporta el <a href="https://volcano.si.edu/gvp_currenteruptions.cfm" target="_blank" rel="noopener">Global Volcanism Program</a> del Smithsonian, ordenadas por actividad más reciente. Se consulta automáticamente cada 3 horas. Los volcanes en erupción llevan un punto rojo parpadeante.</p>
   <p><b>Favoritos:</b> toca ☆ en la ficha de un volcán para guardarlo. Se guardan solo en este navegador.</p>
-  <p><b>Fuentes.</b> Altitud, última erupción, tipo y categoría vienen del <a href="https://volcano.si.edu/" target="_blank" rel="noopener">Global Volcanism Program</a> del Smithsonian (base Volcanoes of the World, consulta del 19 de noviembre de 2026). Cada ficha enlaza a su volcán en el GVP. Cuando el GVP agrupa varios conos en un solo campo volcánico (Paricutín, Jorullo, Xitle, Sunset Crater, Laki), la altitud o la fecha de ese cono vienen de Wikipedia, y la ficha lo indica. Los datos curiosos se contrastaron con los resúmenes geológicos del GVP y con Wikipedia en inglés y español, que citan los estudios originales. Las costas y las fronteras entre países vienen de <a href="https://www.naturalearthdata.com/" target="_blank" rel="noopener">Natural Earth</a> (dominio público).</p>
+  <p><b>Fuentes.</b> Altitud, última erupción, tipo y categoría vienen del <a href="https://volcano.si.edu/" target="_blank" rel="noopener">Global Volcanism Program</a> del Smithsonian (base Volcanoes of the World, consulta del 19 de noviembre de 2026). Cada ficha enlaza a su volcán en el GVP. Cuando el GVP agrupa varios conos en un solo campo volcánico (Paricutín, Jorullo, Xitle, Sunset Crater, Laki), la altitud o la fecha de ese cono vienen de Wikipedia, y la ficha lo indica. Los datos curiosos se contrastaron con los resúmenes geológicos del GVP y con Wikipedia en inglés y español, que citan los estudios originales. Las costas y las fronteras entre países vienen de <a href="https://www.naturalearthdata.com/" target="_blank" rel="noopener">Natural Earth</a> (dominio público). Las placas tectónicas y sus límites son del modelo PB2002 de Peter Bird (2003), en la versión de <a href="https://github.com/fraxen/tectonicplates" target="_blank" rel="noopener">Hugo Ahlenius y Nordpil</a>.</p>
   <p style="color:var(--muted);font-size:13px">Las costas están simplificadas a propósito: es un mapa para explorar, no para navegar en barco.</p>
   <button class="pbtn" id="closeAbout">ENTENDIDO</button>
 </div>
@@ -892,6 +900,38 @@ document.getElementById('ringX').onclick=closeRing;
 document.getElementById('ringClose').onclick=closeRing;
 document.getElementById('ringReplay').onclick=()=>{ring={t0:performance.now()};};
 
+// ---------- Placas tectónicas (Bird 2003, PB2002) ----------
+const PLATE_COL={PA:'#ff7eb6',NA:'#ffa94d',SA:'#ffe066',EU:'#b197fc',AF:'#66d9e8',AN:'#e9ecef',IN:'#a9e34b',AU:'#38d9a9',NZ:'#ff6b6b',
+  CO:'#da77f2',CA:'#ffd43b',AR:'#f783ac',PS:'#e599f7',SO:'#74c0fc',SU:'#ffec99',OK:'#ffc078',AM:'#d0bfff',YA:'#c0eb75',SC:'#99e9f2',JF:'#ff8787'};
+const PLATE_NAMES=[['PACÍFICO',-8,-140,'PA'],['NORTEAMERICANA',48,-100,'NA'],['SUDAMERICANA',-20,-45,'SA'],['EUROASIÁTICA',55,80,'EU'],['AFRICANA',5,15,'AF'],
+  ['ANTÁRTICA',-70,40,'AN'],['INDIA',8,77,'IN'],['AUSTRALIANA',-27,125,'AU'],['NAZCA',-20,-92,'NZ'],['COCOS',7,-97,'CO'],['CARIBE',15,-73,'CA'],
+  ['ARÁBIGA',22,47,'AR'],['FILIPINAS',18,135,'PS'],['SOMALÍ',-15,52,'SO'],['SCOTIA',-57,-45,'SC']];
+let showPlates=false, PLATES=null, PLATE_LINES=null, platesLoading=false;
+const PLATE_LABELS=PLATE_NAMES.map(([t,lat,lon,c])=>({t,x:px(lon),y:py(lat),col:PLATE_COL[c]}));
+async function loadPlates(){
+  if(PLATES||platesLoading)return;platesLoading=true;
+  try{const d=await (await fetch('data/placas.json')).json();
+    const c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');
+    for(const pl of d.placas){g.fillStyle=PLATE_COL[pl.c]||'#ced4da';const path=new Path2D();
+      for(const poly of pl.p)for(const ring of poly){ring.forEach(([lon,lat],i)=>i?path.lineTo(px(lon),py(lat)):path.moveTo(px(lon),py(lat)));path.closePath();}
+      g.fill(path,'evenodd');}
+    const sub=new Path2D(),other=new Path2D();
+    for(const b of d.limites){const P=b.s?sub:other;let prev=null;
+      for(const [lon,lat] of b.l){const x=px(lon),y=py(lat);if(!prev||Math.abs(lon-prev)>180)P.moveTo(x,y);else P.lineTo(x,y);prev=lon;}}
+    PLATES=c;PLATE_LINES={sub,other};
+  }catch(_){showPlates=false;plateChip.setAttribute('aria-pressed','false');}
+  platesLoading=false;
+}
+function drawPlates(x0,oy,k,t){
+  ctx.save();ctx.globalAlpha=0.26;ctx.imageSmoothingEnabled=true;ctx.drawImage(PLATES,x0,oy,W*k,H*k);ctx.restore();
+  ctx.save();ctx.translate(x0,oy);ctx.scale(k,k);ctx.lineJoin='round';ctx.lineCap='round';
+  const w=1/k;
+  ctx.strokeStyle='rgba(7,11,34,.55)';ctx.lineWidth=5*w;ctx.stroke(PLATE_LINES.other);ctx.stroke(PLATE_LINES.sub);
+  ctx.strokeStyle='#fff3bf';ctx.lineWidth=2*w;ctx.setLineDash([6*w,4*w]);ctx.stroke(PLATE_LINES.other);
+  ctx.setLineDash([]);ctx.strokeStyle='#ff4d2e';ctx.lineWidth=3*w;ctx.stroke(PLATE_LINES.sub);
+  ctx.restore();
+}
+
 // ---------- Bucle de dibujo ----------
 let lastT=0, hitBoxes=[], lastInput=0;
 // Ahorro: a ritmo completo solo mientras hay movimiento o interacción; en reposo, ~15 cuadros por segundo.
@@ -916,7 +956,8 @@ function frame(t){
     const ox=vw/2-cam.x*cam.z, oy=Math.round(vh/2-cam.y*cam.z), WZ=W*cam.z, hh=Math.round(H*cam.z);
     for(let k=Math.floor(-ox/WZ)-1;k<=Math.ceil((vw-ox)/WZ);k++){const x0=Math.round(ox+k*WZ),x1=Math.round(ox+(k+1)*WZ);
       if(x1<0||x0>vw)continue;ctx.drawImage(MIPS[lvl],x0,oy,x1-x0+1,hh);
-      if(BORD){ctx.save();ctx.globalAlpha=cam.z<1?0.22:0.3;ctx.imageSmoothingEnabled=cam.z<1;ctx.drawImage(BORD,x0,oy,x1-x0+1,hh);ctx.restore();}}
+      if(BORD){ctx.save();ctx.globalAlpha=cam.z<1?0.22:0.3;ctx.imageSmoothingEnabled=cam.z<1;ctx.drawImage(BORD,x0,oy,x1-x0+1,hh);ctx.restore();}
+      if(showPlates&&PLATES)drawPlates(x0,oy,(x1-x0+1)/W,t);}
     // olas
     const wu=2, step=cam.z<0.9?3:1, ph=REDUCED?0:t/900;
     ctx.fillStyle='#5e9ad6';
@@ -932,6 +973,7 @@ function frame(t){
     for(const sx of screenXs(p.x,200)){
     if(p.k===2)label(p.t,sx,Y,RZ>3.5?16:8,'#bfe3ff');else{const fs=RZ>2.6?16:8;label(p.t,sx,Y,fs,'#fff6d8');if(p.sub)label(p.sub,sx,Y+(fs>8?16:10),fs>8?11:8,'#ffd0c2');}}}}
 
+  if(showPlates&&PLATES)for(const L of PLATE_LABELS){const Y=(L.y-cam.y)*cam.z+vh/2;if(Y<-20||Y>vh+20)continue;for(const sx of screenXs(L.x,200))label(L.t,sx,Y,RZ>2.2?16:8,L.col);}
   drawRing(t);
   // volcanes
   const u=U();hitBoxes=[];
@@ -1088,6 +1130,14 @@ function updateFavChip(){favChip.innerHTML=`<span class="star">★</span>FAVORIT
 favChip.onclick=()=>{if(!favs.size){favChip.title='Abre la ficha de un volcán y toca ☆ FAVORITO para guardarlo';favChip.classList.add('nudge');setTimeout(()=>favChip.classList.remove('nudge'),600);return;}
   onlyFavs=!onlyFavs;favChip.setAttribute('aria-pressed',onlyFavs);if(selected&&!shown(selected))closeCard();renderList();};
 updateFavChip();legend.appendChild(favChip);
+const plateChip=document.createElement('button');plateChip.className='chip platechip';plateChip.setAttribute('aria-pressed','false');
+plateChip.title='Muestra las placas tectónicas y sus límites';
+plateChip.innerHTML='<span class="pk"></span>PLACAS';
+plateChip.onclick=()=>{showPlates=!showPlates;plateChip.setAttribute('aria-pressed',showPlates);document.getElementById('plateKey').hidden=!showPlates;lastInput=performance.now();if(showPlates)loadPlates();};
+legend.appendChild(plateChip);
+const pkey=document.createElement('div');pkey.id='plateKey';pkey.className='platekey';pkey.hidden=true;
+pkey.innerHTML='<span><i class="ksub"></i>Subducción: una placa se hunde bajo otra y nacen volcanes</span><span><i class="koth"></i>Otros límites: las placas se separan o se deslizan</span>';
+legend.after(pkey);
 document.getElementById('subtitle').textContent=`${V.length} volcanes, de Islandia a la Antártida`;
 
 const norm=s=>s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
