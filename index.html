@@ -1210,7 +1210,7 @@ function loadLive(){
 }
 function renderList(){
   const meta=document.getElementById('liveMeta');
-  if(!LIVE.data){meta.textContent=LIVE.error?L('La lista en vivo se actualiza en mapa.eduardoluis.blog. Aquí no se pudo cargar.','The live list updates on mapa.eduardoluis.blog. It couldn’t load here.'):L('Cargando datos del Smithsonian…','Loading Smithsonian data…');vlist.innerHTML='';return;}
+  if(!LIVE.data){meta.textContent=LIVE.error?L('La lista en vivo se actualiza en volcanes.eduardoluis.blog. Aquí no se pudo cargar.','The live list updates on volcanes.eduardoluis.blog. It couldn’t load here.'):L('Cargando datos del Smithsonian…','Loading Smithsonian data…');vlist.innerHTML='';return;}
   const d=LIVE.data,c=new Date(d.consultado);
   const when=c.toLocaleString(L('es-MX','en-US'),{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
   meta.innerHTML=L(`${d.total} erupciones en curso según el <a href="${d.fuente_url}" target="_blank" rel="noopener">Global Volcanism Program</a> (Smithsonian). Actualización semanal.`,`${d.total} ongoing eruptions according to the Smithsonian’s <a href="${d.fuente_url}" target="_blank" rel="noopener">Global Volcanism Program</a>. Weekly update.`);
@@ -1343,7 +1343,7 @@ if(musicPref()!=='off'){Music.start();syncMusicUI();if(!Music.ctx||Music.ctx.sta
 
 // ---------- Contador de visitas (GoatCounter) ----------
 const GOATCOUNTER='';   // código del sitio en GoatCounter, p. ej. 'eduardoluis'
-if(GOATCOUNTER&&location.hostname==='mapa.eduardoluis.blog'){
+if(GOATCOUNTER&&/(^|\.)eduardoluis\.blog$/.test(location.hostname)){
   const sc=document.createElement('script');sc.async=true;sc.src='https://gc.zgo.at/count.js';
   sc.dataset.goatcounter=`https://${GOATCOUNTER}.goatcounter.com/count`;document.head.appendChild(sc);
   fetch(`https://${GOATCOUNTER}.goatcounter.com/counter/TOTAL.json`).then(r=>r.ok?r.json():null).then(j=>{if(!j||!j.count)return;
