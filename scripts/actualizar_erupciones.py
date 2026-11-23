@@ -76,6 +76,14 @@ def nombre(n):
 def pais(p):
     return " / ".join(PAISES.get(x.strip(), x.strip()) for x in (p or "").split("-")) or "—"
 
+def pais_en(p):
+    return " / ".join(x.strip() for x in (p or "").split("-") if x.strip()) or "—"
+
+def tipo_en(t):
+    t = (t or "").replace("(es)", "").replace("(s)", "").replace("(pyroclastic)", " (pyroclastic)").strip()
+    return {"Shield": "Shield volcano", "Complex": "Volcanic complex", "Compound": "Compound volcano",
+            "Submarine": "Submarine volcano", "Fissure vent": "Fissure vent"}.get(t, t[:1].upper() + t[1:] if t else "—")
+
 def main():
     erup = wfs("GVP-VOTW:E3WebApp_Eruptions1960", "ContinuingEruption='True'")
     if len(erup) < 5:
@@ -96,6 +104,8 @@ def main():
             "nombre": nombre(v.get("Volcano_Name") or e["VolcanoName"]),
             "pais": pais(v.get("Country")),
             "tipo": TIPOS.get(v.get("Primary_Volcano_Type"), v.get("Primary_Volcano_Type") or "—"),
+            "pais_en": pais_en(v.get("Country")),
+            "tipo_en": tipo_en(v.get("Primary_Volcano_Type")),
             "altitud": v.get("Elevation"),
             "lat": v.get("Latitude", e.get("LatitudeDecimal")),
             "lon": v.get("Longitude", e.get("LongitudeDecimal")),
