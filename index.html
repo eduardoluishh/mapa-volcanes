@@ -1137,7 +1137,7 @@ function closeCard(){selected=null;card.hidden=true;document.body.classList.remo
 const legend=document.getElementById('legend'),catChips={};
 function updateLegendCounts(){for(const k in catChips)catChips[k].querySelector('.n').textContent=V.filter(v=>v.cat===k).length;
   document.getElementById('subtitle').textContent=subtitleText();}
-function subtitleText(){return L(`${V.length} volcanes destacados, de Islandia a la Antártida`,`${V.length} notable volcanoes, from Iceland to Antarctica`);}
+function subtitleText(){return L(`${V.length} volcanes, de Islandia a la Antártida`,`${V.length} volcanoes, from Iceland to Antarctica`);}
 for(const k of ['a','d']){const n=V.filter(v=>v.cat===k).length;
   const b=document.createElement('button');b.className='chip';b.setAttribute('aria-pressed','true');
   b.innerHTML=`<span class="dot ${k}"></span><span class="cl">${CAT[k].short}</span><span class="n">${n}</span>`;
